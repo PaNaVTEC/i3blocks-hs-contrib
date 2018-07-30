@@ -20,9 +20,12 @@ formatFloatN floatNum numOfDecimals = showFFloat (Just numOfDecimals) floatNum "
 memory :: Fractional a => Shell a
 memory = do
   let memoryReport = input (filePath "/proc/meminfo")
-  memFree <- head <$> match (parseMem MemFree) <$> (strict $ grep (parseMem MemFree) memoryReport)
-  memTotal <- head <$> match (parseMem MemTotal) <$> (strict $ grep (parseMem MemTotal) memoryReport)
+  memFree <- parseMemory memoryReport MemFree
+  memTotal <- parseMemory memoryReport MemTotal
   return $ (fromIntegral $ memTotal - memFree) / 1024 / 1024
+  where
+    parseMemory memoryReport k =
+      head <$> match (parseMem k) <$> (strict $ grep (parseMem k) memoryReport)
 
 parseMem :: MemType -> Pattern Integer
 parseMem memType = do
