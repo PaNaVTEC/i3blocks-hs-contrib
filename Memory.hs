@@ -4,6 +4,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 import           Data.Text (pack)
+import           Numeric
 import           Turtle
 
 data MemType = MemTotal | MemFree
@@ -11,14 +12,17 @@ data MemType = MemTotal | MemFree
 main :: IO ()
 main = sh $ do
   mem <- memory
-  liftIO $ putStrLn $ "\62171" ++ " " ++ show mem
+  liftIO $ putStrLn $ "\62171" ++ " " ++ formatFloatN mem 2 ++ "G"
 
-memory :: Shell Integer
+formatFloatN :: RealFloat a => a -> Int -> String
+formatFloatN floatNum numOfDecimals = showFFloat (Just numOfDecimals) floatNum ""
+
+memory :: Fractional a => Shell a
 memory = do
   let memoryReport = input (filePath "/proc/meminfo")
   memFree <- head <$> match (parseMem MemFree) <$> (strict $ grep (parseMem MemFree) memoryReport)
   memTotal <- head <$> match (parseMem MemTotal) <$> (strict $ grep (parseMem MemTotal) memoryReport)
-  return $ memTotal - memFree
+  return $ (fromIntegral $ memTotal - memFree) / 1024 / 1024
 
 parseMem :: MemType -> Pattern Integer
 parseMem memType = do
