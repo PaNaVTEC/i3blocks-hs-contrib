@@ -8,12 +8,8 @@ import           Turtle
 
 main :: IO ()
 main = sh $ do
-  icon <- icon'
   wifi <- wifi'
-  liftIO $ putStrLn $ (unpack icon) ++ " " ++ (unpack wifi)
-
-icon' :: Shell Text
-icon' = liftIO $ return "\61931"
+  liftIO $ putStrLn $ "\61931" ++ " " ++ (unpack wifi)
 
 wifi' :: Shell Text
 wifi' = strict $ inshell (pack "iwgetid -r") empty
