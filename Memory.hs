@@ -42,6 +42,3 @@ filePath p = fromText $ pack p
 
 dockerIsRunning :: Shell Bool
 dockerIsRunning = ((== ExitSuccess) . fst) <$> shellStrict (pack "pidof dockerd") empty
-
-nImages :: Shell Integer
-nImages = fold (inshell (pack "docker ps -q") empty) countLines
