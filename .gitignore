@@ -107,3 +107,6 @@ tags
 .nfs*
 
 
+.o
+.hi
+.bin/
