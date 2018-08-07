@@ -4,8 +4,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 import           Data.Text (pack)
-import           Numeric
 import           Turtle
+import           Common
 
 data MemType = MemTotal | MemFree
 
@@ -13,9 +13,6 @@ main :: IO ()
 main = sh $ do
   mem <- memory
   liftIO $ putStrLn $ "\62171" ++ " " ++ formatFloatN mem 2 ++ "G"
-
-formatFloatN :: RealFloat a => a -> Int -> String
-formatFloatN floatNum numOfDecimals = showFFloat (Just numOfDecimals) floatNum ""
 
 memory :: Fractional a => Shell a
 memory = do
