@@ -4,7 +4,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DeriveGeneric #-}
 
-import           Data.Text (pack)
+import           Data.Text (pack, unpack)
 import           Turtle
 import           Network.Wreq
 import           Control.Lens
@@ -20,4 +20,10 @@ instance FromJSON ResultCount
 main :: IO ()
 main = do
   response <- get "https://api.gdax.com/products/BTC-EUR/ticker"
-  putStrLn $ show $ response ^? responseBody . key "ask" . _Number
+  ask <- return $ response ^? responseBody . key "ask"
+  putStrLn $ formatValue ask
+  return ()
+
+formatValue:: Maybe Value -> String
+formatValue (Just (String s)) = "\61786 " ++ unpack s ++ " €"
+formatValue _ = ""
