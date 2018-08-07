@@ -7,3 +7,4 @@ ghc -o ./bin/Docker Docker.hs Common.hs
 ghc -o ./bin/Memory Memory.hs
 ghc -o ./bin/OpenVpn OpenVpn.hs Common.hs
 ghc -o ./bin/Wifi Wifi.hs
+ghc -o ./bin/Bitcoin Bitcoin.hs
