@@ -22,7 +22,6 @@ main = do
   response <- get "https://api.gdax.com/products/BTC-EUR/ticker"
   ask <- return $ response ^? responseBody . key "ask"
   putStrLn $ formatValue ask
-  return ()
 
 formatValue:: Maybe Value -> String
 formatValue (Just (String s)) = "\61786 " ++ unpack s ++ " €"
