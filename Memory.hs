@@ -36,6 +36,3 @@ parseMem memType = do
 
 filePath :: String -> Turtle.FilePath
 filePath p = fromText $ pack p
-
-dockerIsRunning :: Shell Bool
-dockerIsRunning = ((== ExitSuccess) . fst) <$> shellStrict (pack "pidof dockerd") empty
