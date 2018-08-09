@@ -8,14 +8,21 @@ import           Turtle
 
 main :: IO ()
 main = sh $ do
+  muted <- isMuted
   vol <- getVolume
-  liftIO $ putStrLn $ icon vol ++ " " ++ show vol ++ "%"
+  liftIO $ putStrLn $ formatVol muted vol
+
+formatVol :: Bool -> Integer -> String
+formatVol True _ = "\61478" ++ " " ++ "x"
+formatVol False vol = icon vol ++ " " ++ show vol ++ "%"
 
 icon :: Integer -> String
-icon 0 = "\61478"
 icon v | v < 33 = "\61479"
 icon _ = "\61480"
 
+isMuted :: Shell Bool
+isMuted = (/= ExitSuccess) <$> shell (pack "ponymix is-muted") empty
+
 getVolume :: Shell Integer
-getVolume = toInteger <$> (strict $ inshell (pack "ponymix get-volume") empty)
-  where toInteger = read . unpack . strip
+getVolume = toVolumeInt <$> (strict $ inshell (pack "ponymix get-volume") empty)
+  where toVolumeInt = read . unpack . strip
