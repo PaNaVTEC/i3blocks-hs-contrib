@@ -5,12 +5,21 @@
 
 import           Data.Text (pack, unpack, strip)
 import           Turtle
+import           Common
 
 main :: IO ()
 main = sh $ do
   muted <- isMuted
   vol <- getVolume
   liftIO $ putStrLn $ formatVol muted vol
+  button <- currentButton
+  handleButton button
+
+handleButton :: MonadIO io => Maybe Button -> io ExitCode
+handleButton Nothing = return ExitSuccess
+handleButton (Just RightClick) = shell "ponymix toggle >/dev/null" empty
+handleButton (Just WheelUp) = shell "ponymix increase 5 >/dev/null" empty
+handleButton (Just WheelDown) = shell "ponymix decrease 5 >/dev/null" empty
 
 formatVol :: Bool -> Integer -> String
 formatVol True _ = "\61478" ++ " " ++ "x"
