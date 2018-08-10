@@ -8,7 +8,7 @@ import           Numeric
 import           Turtle
 
 newtype BatteryPercentage = BatteryPercentage Integer
-newtype BatteryStatus = BatteryStatus String
+data BatteryStatus = Discharging | Charging | Plugged
 data MemType = MemTotal | MemFree
 
 main :: IO ()
@@ -18,13 +18,14 @@ main = sh $ do
   liftIO $ putStrLn $ formatBattery info
 
 formatBattery :: (BatteryPercentage, BatteryStatus) -> String
-formatBattery (BatteryPercentage per, _) = icon per ++ " " ++ show per ++ "%"
+formatBattery (BatteryPercentage per, Discharging) = icon per ++ " " ++ show per ++ "%"
   where
     icon per | per >= 90 = "\62016" -- 4/4
     icon per | per >= 75 = "\62017" -- 3/4
     icon per | per >= 50 = "\62018" -- 2/4
     icon per | per >= 25 = "\62019" -- 1/4
     icon per | per >= 00 = "\62020" -- 0/4
+formatBattery (BatteryPercentage per, _) =  "\61926 " ++ show per ++ "%"
 
 parse :: Text -> (BatteryPercentage, BatteryStatus)
 parse acpi = head $ match batteryLeft acpi
@@ -43,7 +44,11 @@ batteryLeft = do
   "%,"
   spaces1
   star anyChar
-  return (BatteryPercentage per, BatteryStatus $ unpack state)
+  return (BatteryPercentage per, toBatteryStatus state)
+  where
+    toBatteryStatus "Discharging" = Discharging
+    toBatteryStatus "Charging" = Charging
+    toBatteryStatus "Plugged" = Charging
 
 acpi' :: Shell Text
 acpi' = strict $ inshell (pack "acpi") empty
