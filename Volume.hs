@@ -17,6 +17,7 @@ main = sh $ do
 
 handleButton :: MonadIO io => Maybe Button -> io ExitCode
 handleButton Nothing = return ExitSuccess
+handleButton (Just LeftClick) = shell "pavucontrol" empty
 handleButton (Just RightClick) = shell "ponymix toggle >/dev/null" empty
 handleButton (Just WheelUp) = shell "ponymix increase 5 >/dev/null" empty
 handleButton (Just WheelDown) = shell "ponymix decrease 5 >/dev/null" empty
