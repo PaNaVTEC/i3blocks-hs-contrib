@@ -10,3 +10,4 @@ ghc -o ./bin/Wifi Wifi.hs
 ghc -o ./bin/Bitcoin Bitcoin.hs
 ghc -o ./bin/Battery Battery.hs
 ghc -o ./bin/Cpu Cpu.hs Common.hs
+ghc -o ./bin/AirplaneMode AirplaneMode.hs Common.hs
