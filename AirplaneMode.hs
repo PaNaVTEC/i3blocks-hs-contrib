@@ -3,71 +3,70 @@
 
 {-# LANGUAGE OverloadedStrings #-}
 
-import           Data.Text (lines, pack, unpack)
-import           Turtle
 import           Common
+import           Data.Bool
+import           Data.Text (lines, pack)
+import           Turtle
 
 type CardName = Text
 type CardDev = Text
-data BlockType = Soft | Hard | SoftAndHard | NotBlocked deriving Show
+data BlockType = Soft | Hard | SoftAndHard | NotBlocked deriving (Eq, Show)
 type Index = Int
-newtype Card = Card (Index, CardName, CardDev, BlockType) deriving Show
+data Card = Card { index     :: Index,
+                   cardName  :: CardName,
+                   cardDev   :: CardDev,
+                   blockType :: BlockType } deriving Show
 data AirplaneAction = Activate | Deactivate deriving (Eq, Show)
 
 main :: IO ()
 main = sh $ do
-  leftClicked <- buttonClicked LeftClick
   rfkill <- rfkill'
   cards <- return $ head $ match (parseCards rfkill) rfkill
-  case isAirplaneMode cards of
-    True -> do
-      liftIO $ putStrLn "\61554"
-      handleLeftClick leftClicked Deactivate cards
-    False -> do
-      liftIO $ putStrLn "\61554 x"
-      handleLeftClick leftClicked Activate cards
+  let isAirplaneOn = isAirplaneMode cards
+  bool (airplaneModeOff cards) (airplaneModeOn cards) isAirplaneOn
+  where
+    airplaneModeOn cards = do liftIO $ putStrLn "\61554"; handleClick Deactivate cards
+    airplaneModeOff cards = do liftIO $ putStrLn "\61554 x"; handleClick Activate cards
 
-handleLeftClick :: Bool -> AirplaneAction -> [Card] -> Shell [ExitCode]
-handleLeftClick True action cards = sequence $ (blockCards action) cards
-handleLeftClick _ _ _ = return []
+handleClick :: AirplaneAction -> [Card] -> Shell [ExitCode]
+handleClick action cards = do
+  leftClicked <- buttonClicked LeftClick
+  liftIO $ putStrLn $ show $ leftClicked
+  bool (return []) (sequence $ (blockCards action) cards) leftClicked
 
 blockCards :: AirplaneAction -> [Card] -> [Shell ExitCode]
-blockCards act cards = ((actionCard act) . indexCard) <$> cards
-
-indexCard :: Card -> Index
-indexCard (Card (i, _, _, _)) = i
+blockCards act cards = do
+  (actionCard act . index) <$> cards
 
 actionCard :: (MonadIO io, Show a) => AirplaneAction -> a -> io ExitCode
 actionCard Deactivate i = shell (pack $ "rfkill block " ++ show i) empty
-actionCard Activate i = shell (pack $ "rfkill unblock " ++ show i) empty
+actionCard Activate i   = shell (pack $ "rfkill unblock " ++ show i) empty
 
 isAirplaneMode :: [Card] -> Bool
-isAirplaneMode cards = all isBlocked cards
-  where
-    isBlocked (Card (_, _, _, NotBlocked)) = False
-    isBlocked _ = True
+isAirplaneMode cards = all ((/= NotBlocked) . blockType) cards
 
 parseCards :: Text -> Pattern [Card]
 parseCards rfkill =
   let cardCount = countCards rfkill
   in bounded cardCount cardCount parseCard
   where
-    countCards = (`div` 3) . length . Data.Text.lines
+    countCards = (`div` linesPerCard) . length . Data.Text.lines
+    linesPerCard = 3
 
 parseCard :: Pattern Card
 parseCard = do
-  index <- decimal <* separator
-  cardDev <- star alphaNum <* separator
-  cardName <- chars1 <* newline
+  index' <- decimal <* separator
+  cardDev' <- star alphaNum <* separator
+  cardName' <- chars1 <* newline
   soft <- tab *> "Soft blocked" *> separator *> ("yes" <|> "no") <* newline
   hard <- tab *> "Hard blocked" *> separator *> ("yes" <|> "no") <* newline
-  return $ Card (index, cardName, cardDev, toBlockType soft hard)
+  return $ Card index' cardName' cardDev' (toBlockType soft hard)
   where
     separator = skip (":" *> spaces1)
     toBlockType "yes" "yes" = SoftAndHard
-    toBlockType "yes" _ = Soft
-    toBlockType _ "yes" = Hard
-    toBlockType _ _ = NotBlocked
+    toBlockType "yes" _     = Soft
+    toBlockType _ "yes"     = Hard
+    toBlockType _ _         = NotBlocked
 
 rfkill' :: Shell Text
 rfkill' = strict $ inshell (pack "rfkill list") empty
