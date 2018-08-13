@@ -31,16 +31,14 @@ main = sh $ do
 handleClick :: AirplaneAction -> [Card] -> Shell [ExitCode]
 handleClick action cards = do
   leftClicked <- buttonClicked LeftClick
-  liftIO $ putStrLn $ show $ leftClicked
   bool (return []) (sequence $ (blockCards action) cards) leftClicked
 
 blockCards :: AirplaneAction -> [Card] -> [Shell ExitCode]
-blockCards act cards = do
-  (actionCard act . index) <$> cards
+blockCards act cards = (actionCard act . index) <$> cards
 
 actionCard :: (MonadIO io, Show a) => AirplaneAction -> a -> io ExitCode
-actionCard Deactivate i = shell (pack $ "rfkill block " ++ show i) empty
-actionCard Activate i   = shell (pack $ "rfkill unblock " ++ show i) empty
+actionCard Deactivate i = shell (pack $ "rfkill unblock " ++ show i) empty
+actionCard Activate i   = shell (pack $ "rfkill block " ++ show i) empty
 
 isAirplaneMode :: [Card] -> Bool
 isAirplaneMode cards = all ((/= NotBlocked) . blockType) cards
