@@ -1,6 +1,3 @@
-#!/usr/bin/env stack
--- stack runghc --package turtle
-
 {-# LANGUAGE OverloadedStrings #-}
 
 import           Common
@@ -12,7 +9,7 @@ main = sh $ do
   isRunning <- processIsRunning "openvpn"
   case isRunning of
     False -> formatCommand "x"
-    True -> formatCommand "✓"
+    True  -> formatCommand "✓"
 
 formatCommand :: String -> Shell ()
 formatCommand out = liftIO $ putStrLn $ "\61676" ++ " " ++ out

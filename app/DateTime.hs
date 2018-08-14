@@ -1,6 +1,3 @@
-#!/usr/bin/env stack
--- stack --install-ghc runghc
-
 import           Data.Time.Format
 import           Data.Time.LocalTime
 import           System.Environment

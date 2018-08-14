@@ -1,10 +1,6 @@
-#!/usr/bin/env stack
--- stack runghc --package turtle
-
 {-# LANGUAGE OverloadedStrings #-}
 
-import           Data.Text (pack, unpack)
-import           Numeric
+import           Data.Text (pack)
 import           Turtle
 
 newtype BatteryPercentage = BatteryPercentage Integer
@@ -47,8 +43,8 @@ batteryLeft = do
   return (BatteryPercentage per, toBatteryStatus state)
   where
     toBatteryStatus "Discharging" = Discharging
-    toBatteryStatus "Charging" = Charging
-    toBatteryStatus "Plugged" = Charging
+    toBatteryStatus "Charging"    = Charging
+    toBatteryStatus "Plugged"     = Charging
 
 acpi' :: Shell Text
 acpi' = strict $ inshell (pack "acpi") empty

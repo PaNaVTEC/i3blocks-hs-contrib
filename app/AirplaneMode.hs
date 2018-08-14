@@ -1,6 +1,3 @@
-#!/usr/bin/env stack
--- stack runghc --package turtle
-
 {-# LANGUAGE OverloadedStrings #-}
 
 import           Common

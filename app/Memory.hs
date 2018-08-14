@@ -1,11 +1,8 @@
-#!/usr/bin/env stack
--- stack runghc --package turtle
-
 {-# LANGUAGE OverloadedStrings #-}
 
+import           Common
 import           Data.Text (pack)
 import           Turtle
-import           Common
 
 data MemType = MemTotal | MemFree
 
