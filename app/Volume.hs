@@ -1,23 +1,21 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 import           Common
-import           Data.Text (pack, strip, unpack)
+import           Control.Applicative (liftA2)
+import           Data.Maybe          (maybe)
+import           Data.Text           (pack, strip, unpack)
 import           Turtle
 
 main :: IO ()
 main = sh $ do
-  muted <- isMuted
-  vol <- getVolume
-  liftIO $ putStrLn $ formatVol muted vol
-  button <- currentButton
-  handleButton button
+  liftIO . putStrLn =<< liftA2 formatVol isMuted getVolume
+  maybe (return ExitSuccess) handleButton =<< currentButton
 
-handleButton :: MonadIO io => Maybe Button -> io ExitCode
-handleButton Nothing           = return ExitSuccess
-handleButton (Just LeftClick)  = shell "pavucontrol" empty
-handleButton (Just RightClick) = shell "ponymix toggle >/dev/null" empty
-handleButton (Just WheelUp)    = shell "ponymix increase 5 >/dev/null" empty
-handleButton (Just WheelDown)  = shell "ponymix decrease 5 >/dev/null" empty
+handleButton :: MonadIO io => Button -> io ExitCode
+handleButton LeftClick  = shell "pavucontrol" empty
+handleButton RightClick = shell "ponymix toggle >/dev/null" empty
+handleButton WheelUp    = shell "ponymix increase 5 >/dev/null" empty
+handleButton WheelDown  = shell "ponymix decrease 5 >/dev/null" empty
 
 formatVol :: Bool -> Integer -> String
 formatVol True _    = "\61478 x"
