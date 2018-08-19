@@ -7,26 +7,26 @@ import           Turtle
 data MemType = MemTotal | MemFree
 
 main :: IO ()
-main = sh $ do
-  mem <- memory
-  liftIO $ putStrLn $ "\62171" ++ " " ++ formatFloatN mem 2 ++ "G"
+main = sh $ (liftIO . putStrLn . format') =<< (memory :: Shell Float)
+  where
+    format' mem = "\62171 " ++ formatFloatN mem 2 ++ "G"
 
-memory :: Fractional a => Shell a
+memory :: RealFloat a => Shell a
 memory = do
   let memoryReport = input (filePath "/proc/meminfo")
   memFree <- parseMemory memoryReport MemFree
   memTotal <- parseMemory memoryReport MemTotal
-  return $ (fromIntegral $ memTotal - memFree) / 1024 / 1024
+  return $ kbsToGb (fromIntegral $ memTotal - memFree)
   where
+    kbsToGb kbs = kbs / 1024 / 1024
     parseMemory memoryReport k =
       head <$> match (parseMem k) <$> (strict $ grep (parseMem k) memoryReport)
 
 parseMem :: MemType -> Pattern Integer
-parseMem memType = do
-  toMem memType <> ":"
-  mem <- spaces1 *> decimal <* spaces1
-  star anyChar
-  return mem
+parseMem memType = parseMemType memType *> spaces1 *> decimal <* star anyChar
+
+parseMemType :: MemType -> Pattern Text
+parseMemType t = toMem t <> ":"
   where
     toMem MemTotal = "MemTotal"
     toMem MemFree  = "MemFree"
