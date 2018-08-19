@@ -1,15 +1,14 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 import           Common
-import           Data.Text (pack)
+import           Control.Applicative (liftA3)
+import           Data.Bool           (bool)
+import           Data.Text           (pack)
 import           Turtle
 
 main :: IO ()
-main = sh $ do
-  isRunning <- processIsRunning "openvpn"
-  case isRunning of
-    False -> formatCommand "x"
-    True  -> formatCommand "✓"
+main = sh $ processIsRunning "openvpn" >>=
+  bool (printCommand "x") (printCommand "✓")
 
-formatCommand :: String -> Shell ()
-formatCommand out = liftIO $ putStrLn $ "\61676" ++ " " ++ out
+printCommand :: String -> Shell ()
+printCommand out = liftIO $ putStrLn $ "\61676" ++ " " ++ out
