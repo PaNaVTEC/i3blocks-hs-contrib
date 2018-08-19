@@ -8,7 +8,7 @@ import           Turtle
 
 main :: IO ()
 main = sh $ do
-  liftIO . putStrLn =<<liftA2 formatVol isMuted getVolume
+  liftIO . putStrLn =<< liftA2 formatVol isMuted getVolume
   maybe (return ExitSuccess) handleButton =<< currentButton
 
 handleButton :: MonadIO io => Button -> io ExitCode
