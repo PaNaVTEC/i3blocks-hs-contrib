@@ -1,12 +1,15 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-import           Data.Text (pack, unpack)
+import           Data.Monoid
+import           Data.Text.IO (putStrLn)
+import           Prelude      hiding (putStrLn)
 import           Turtle
 
 main :: IO ()
-main = sh $ do
-  wifi <- wifi'
-  liftIO $ putStrLn $ "\61931" ++ " " ++ (unpack wifi)
+main = sh $ liftIO . putStrLn . format' =<< ssid
 
-wifi' :: Shell Text
-wifi' = strict $ inshell (pack "iwgetid -r") empty
+format' :: Text -> Text
+format' ssid = "\61931" <> " " <> ssid
+
+ssid :: Shell Text
+ssid = strict $ inshell "iwgetid -r" empty
