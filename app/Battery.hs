@@ -14,15 +14,18 @@ main = sh $ do
   liftIO $ putStrLn $ formatBattery info
 
 formatBattery :: (BatteryPercentage, BatteryStatus) -> String
-formatBattery (BatteryPercentage per, Discharging) = icon per ++ " " ++ show per ++ "%"
-  where
-    icon p | p >= 90 = "\62016"
-    icon p | p >= 75 = "\62017"
-    icon p | p >= 50 = "\62018"
-    icon p | p >= 25 = "\62019"
-    icon _ = "\62020"
-formatBattery (BatteryPercentage per, Unknown) =  "B? " ++ show per ++ "%"
-formatBattery (BatteryPercentage per, _) =  "\61926 " ++ show per ++ "%"
+formatBattery (BatteryPercentage per, Discharging) = format' (icon per) per
+formatBattery (BatteryPercentage per, Unknown) =  format' (icon per) per
+formatBattery (BatteryPercentage per, _) =  format' "\61926 " per
+
+format' i per = i ++ " " ++ show per ++ "%"
+
+icon :: Integer -> String
+icon p | p >= 90 = "\62016"
+icon p | p >= 75 = "\62017"
+icon p | p >= 50 = "\62018"
+icon p | p >= 25 = "\62019"
+icon _ = "\62020"
 
 parse :: Text -> (BatteryPercentage, BatteryStatus)
 parse acpi = head $ match batteryLeft acpi
