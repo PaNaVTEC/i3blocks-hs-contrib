@@ -4,7 +4,7 @@ import           Data.Text (pack)
 import           Turtle
 
 newtype BatteryPercentage = BatteryPercentage Integer
-data BatteryStatus = Discharging | Charging | Plugged
+data BatteryStatus = Discharging | Charging | Plugged | Unknown
 data MemType = MemTotal | MemFree
 
 main :: IO ()
@@ -14,37 +14,34 @@ main = sh $ do
   liftIO $ putStrLn $ formatBattery info
 
 formatBattery :: (BatteryPercentage, BatteryStatus) -> String
-formatBattery (BatteryPercentage per, Discharging) = icon per ++ " " ++ show per ++ "%"
-  where
-    icon per | per >= 90 = "\62016" -- 4/4
-    icon per | per >= 75 = "\62017" -- 3/4
-    icon per | per >= 50 = "\62018" -- 2/4
-    icon per | per >= 25 = "\62019" -- 1/4
-    icon per | per >= 00 = "\62020" -- 0/4
-formatBattery (BatteryPercentage per, _) =  "\61926 " ++ show per ++ "%"
+formatBattery (BatteryPercentage per, Discharging) = format' (icon per) per
+formatBattery (BatteryPercentage per, Unknown) =  format' (icon per) per
+formatBattery (BatteryPercentage per, _) =  format' "\61926 " per
+
+format' i per = i ++ " " ++ show per ++ "%"
+
+icon :: Integer -> String
+icon p | p >= 90 = "\62016"
+icon p | p >= 75 = "\62017"
+icon p | p >= 50 = "\62018"
+icon p | p >= 25 = "\62019"
+icon _ = "\62020"
 
 parse :: Text -> (BatteryPercentage, BatteryStatus)
 parse acpi = head $ match batteryLeft acpi
 
 batteryLeft :: Pattern (BatteryPercentage, BatteryStatus)
 batteryLeft = do
-  "Battery"
-  spaces1
-  decimal
-  ":"
-  spaces1
-  state <- chars1
-  ","
-  spaces1
-  per <- decimal
-  "%,"
-  spaces1
-  star anyChar
+  batteryNumber
+  state <- spaces1 *> chars1 <* ","
+  per <- spaces1 *> decimal <* "%" <* ("," <|> "") <* spaces1 <* star anyChar
   return (BatteryPercentage per, toBatteryStatus state)
   where
+    batteryNumber = "Battery" *> spaces1 *> decimal *> ":"
     toBatteryStatus "Discharging" = Discharging
     toBatteryStatus "Charging"    = Charging
-    toBatteryStatus "Plugged"     = Charging
+    toBatteryStatus "Plugged"     = Plugged
+    toBatteryStatus _ = Unknown
 
 acpi' :: Shell Text
 acpi' = strict $ inshell (pack "acpi") empty
