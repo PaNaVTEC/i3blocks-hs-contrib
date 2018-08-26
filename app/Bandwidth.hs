@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+import           Common
 import           Control.Applicative       (liftA3)
 import           Control.Exception         (try)
 import           Control.Monad.Trans.Maybe (MaybeT (..), runMaybeT)
@@ -98,13 +99,14 @@ speedReport oldRecord newRecord = Report (UploadRate uploadRate) (DownloadRate d
 
 formatReport :: Report -> String
 formatReport report =
-  "\61677 " ++
-  ((printf "%.1f") . value . runDownloadRate . downloadRate $ report) ++
-  (show . unit . runDownloadRate . downloadRate $ report) ++
-  "  " ++
-  "\61678 " ++
-  ((printf "%.1f") . value . runUploadRate . uploadRate $ report) ++
+  "\61677 " <>
+  (oneDecimal . value . runDownloadRate . downloadRate $ report) <>
+  (show . unit . runDownloadRate . downloadRate $ report) <>
+  "  " <>
+  "\61678 " <>
+  (oneDecimal . value . runUploadRate . uploadRate $ report) <>
   (show . unit . runUploadRate . uploadRate $ report)
+  where oneDecimal = flip formatFloatN 1
 
 applyBestUnit :: Report -> Report
 applyBestUnit = liftA2 Report
