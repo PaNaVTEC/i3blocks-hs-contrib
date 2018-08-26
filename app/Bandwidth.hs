@@ -130,9 +130,12 @@ defaultInterface = textToMaybe . strip <$>
   where textToMaybe text = bool (Just text) Nothing (Data.Text.null text)
 
 readBytesTransfered :: Text -> Shell TotalBytesOut
-readBytesTransfered interface = (TotalBytesOut . read . unpack . strip) <$>
-  (strict $ inshell ("cat /sys/class/net/" <> interface <> "/statistics/tx_bytes") mempty)
+readBytesTransfered interface = TotalBytesOut <$> readNumberFrom command
+  where command = "cat /sys/class/net/" <> interface <> "/statistics/tx_bytes"
 
 readBytesReceived :: Text -> Shell TotalBytesIn
-readBytesReceived interface = (TotalBytesIn . read . unpack . strip) <$>
-  (strict $ inshell ("cat /sys/class/net/" <> interface <> "/statistics/rx_bytes") mempty)
+readBytesReceived interface = TotalBytesIn <$> readNumberFrom command
+  where command = "cat /sys/class/net/" <> interface <> "/statistics/rx_bytes"
+
+readNumberFrom :: Text -> Shell Integer
+readNumberFrom command = read . unpack . strip <$> (strict $ inshell command mempty)
