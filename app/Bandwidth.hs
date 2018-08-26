@@ -12,7 +12,9 @@ import           Data.Text                 (null, pack, strip, unpack)
 import           Data.Time.Clock.POSIX     (getPOSIXTime)
 import           Prelude                   hiding (FilePath)
 import           Text.Printf               (printf)
-import           Turtle                    hiding (fold, printf)
+import           Turtle                    hiding (empty, fold, printf)
+
+-- TODO CHECK what happens if i3blocks-bandwidth-module dir does not exist
 
 data Report = Report {
     uploadRate   :: UploadRate,
@@ -40,8 +42,11 @@ newtype TotalBytesOut = TotalBytesOut { runTotalBytesOut :: Integer } deriving (
 type Timestamp = Integer
 type NetworkInterface = Text
 
-path :: FilePath
-path = "/dev/shm/i3-blocks-bandwidth-module"
+dataPathForInterface :: NetworkInterface -> FilePath
+dataPathForInterface interface = dataPath </> fromText interface
+
+dataPath :: FilePath
+dataPath = "/dev/shm/i3blocks-bandwidth-module"
 
 main :: IO ()
 main = sh $
@@ -50,21 +55,29 @@ main = sh $
   >>= liftIO . putStrLn
   where handleNoInterface = return "No interface"
 
+initPath :: NetworkInterface -> Shell FilePath
+initPath interface = do
+  mktree dataPath
+  touch $ dataPathForInterface interface
+  return $ dataPathForInterface interface
+
 runScript :: NetworkInterface -> Shell String
-runScript interface = liftA3 bool (handleInterfaceDown interface) (handleInterfaceUp interface path) (isUp interface)
+runScript interface = do
+  initPath interface
+  liftA3 bool (handleInterfaceDown interface) (handleInterfaceUp interface) (isUp interface)
 
 handleInterfaceDown :: NetworkInterface -> Shell String
 handleInterfaceDown interface = return . unpack $ interface <> " is down"
 
-handleInterfaceUp :: NetworkInterface -> FilePath -> Shell String
-handleInterfaceUp interface path = maybe handleNoRecordAvailable handleRecord
-                                   =<< readRecord path
+handleInterfaceUp :: NetworkInterface -> Shell String
+handleInterfaceUp interface = maybe handleNoRecordAvailable handleRecord
+                                   =<< readRecord interface
   where handleRecord oldRecord = return . formatReport . applyBestUnit . speedReport oldRecord
-                                 =<< writeRecord interface path
-        handleNoRecordAvailable = writeRecord interface path >>= return "No data"
+                                 =<< writeRecord interface
+        handleNoRecordAvailable = writeRecord interface >>= return "No data"
 
-writeRecord :: NetworkInterface -> FilePath -> Shell Record
-writeRecord interface path =
+writeRecord :: NetworkInterface -> Shell Record
+writeRecord interface =
   liftA3 Record (liftIO poxisTimeAsInteger) (readBytesReceived interface) (readBytesTransfered interface)
   >>= liftIO . writeRecordToFile
   where recordToText record = pack . fold . intersperse " " $
@@ -73,11 +86,12 @@ writeRecord interface path =
            show . runTotalBytesOut . bytesSent $ record,
            "\n"]
         poxisTimeAsInteger = round <$> getPOSIXTime
-        writeRecordToFile record = (writeTextFile path . recordToText $ record) *> return record
+        writeRecordToFile record = (writeTextFile (dataPathForInterface interface) . recordToText $ record)
+          *> return record
 
-readRecord :: FilePath -> Shell (Maybe Record)
-readRecord path = liftIO . runMaybeT $ extractRecord =<< safeReadTextFile
-  where safeReadTextFile = MaybeT $ tryToMaybe <$> try (strip <$> readTextFile path)
+readRecord :: NetworkInterface -> Shell (Maybe Record)
+readRecord interface = liftIO . runMaybeT $ extractRecord =<< safeReadTextFile
+  where safeReadTextFile = MaybeT $ tryToMaybe <$> try (strip <$> readTextFile (dataPathForInterface interface))
         extractRecord = MaybeT . return . matchToMaybe . match (decimal `sepBy` " ")
         matchToMaybe x = case x of
          [[time, received, sent]] -> Just $ Record time (TotalBytesIn received) (TotalBytesOut sent)
@@ -122,7 +136,7 @@ isUp :: Text -> Shell Bool
 isUp interface = let state = inshell ("cat /sys/class/net/" <> interface <> "/operstate") mempty
                  in ("up" ==) . lineToText <$> state
 
-defaultInterface :: Shell (Maybe Text)
+defaultInterface :: Shell (Maybe NetworkInterface)
 defaultInterface = textToMaybe . strip <$>
   (strict $ inshell ("ip route | awk '/^default/ { print $5 ; exit }'") mempty)
   where textToMaybe text = bool (Just text) Nothing (Data.Text.null text)
