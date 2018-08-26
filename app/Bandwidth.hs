@@ -121,8 +121,8 @@ convertRate rate to | unit rate > to = convertRate (convertRateDown rate) to
 convertRate rate _  | otherwise      = rate
 
 isUp :: Text -> Shell Bool
-isUp interface = let state = inshell ("cat /sys/class/net/" <> interface <> "/operstate") mempty
-                 in ("up" ==) . lineToText <$> state
+isUp interface = (== "up") . lineToText <$> inshell command mempty
+  where command = ("cat /sys/class/net/" <> interface <> "/operstate")
 
 defaultInterface :: Shell (Maybe Text)
 defaultInterface = safeHead . match parseInterface <$> onlyDefault
