@@ -11,7 +11,8 @@ import           Data.Monoid               ((<>))
 import           Data.Text                 (null, pack, strip, unpack)
 import           Data.Time.Clock.POSIX     (getPOSIXTime)
 import           Prelude                   hiding (FilePath)
-import           Turtle                    hiding (fold)
+import           Text.Printf               (printf)
+import           Turtle                    hiding (fold, printf)
 
 data Report = Report {
     uploadRate   :: UploadRate,
@@ -22,7 +23,7 @@ newtype DownloadRate = DownloadRate { runDownloadRate :: TransferRate } deriving
 newtype UploadRate = UploadRate { runUploadRate :: TransferRate } deriving Show
 
 data TransferRate = TransferRate {
-    value :: Integer,
+    value :: Double,
     unit  :: TransferUnit
   } deriving (Show, Eq)
 
@@ -92,17 +93,17 @@ speedReport oldRecord newRecord = Report (UploadRate uploadRate) (DownloadRate d
   where timediff          = max (timestamp newRecord - timestamp oldRecord) 1
         bytesReceivedDiff = (runTotalBytesIn $ bytesReceived newRecord) - (runTotalBytesIn $ bytesReceived oldRecord)
         bytesSentDiff     = (runTotalBytesOut $ bytesSent newRecord) - (runTotalBytesOut $ bytesSent oldRecord)
-        downloadRate      = TransferRate (bytesReceivedDiff `div` timediff) Bs
-        uploadRate        = TransferRate (bytesSentDiff `div` timediff) Bs
+        downloadRate      = TransferRate (fromIntegral bytesReceivedDiff / fromIntegral timediff) Bs
+        uploadRate        = TransferRate (fromIntegral bytesSentDiff / fromIntegral timediff) Bs
 
 formatReport :: Report -> String
 formatReport report =
   "\61677 " ++
-  (show . value . runDownloadRate . downloadRate $ report) ++
+  ((printf "%.1f") . value . runDownloadRate . downloadRate $ report) ++
   (show . unit . runDownloadRate . downloadRate $ report) ++
   "  " ++
   "\61678 " ++
-  (show . value . runUploadRate . uploadRate $ report) ++
+  ((printf "%.1f") . value . runUploadRate . uploadRate $ report) ++
   (show . unit . runUploadRate . uploadRate $ report)
 
 applyBestUnit :: Report -> Report
@@ -114,7 +115,7 @@ applyBestUnit = liftA2 Report
 
 convertRate :: TransferRate -> TransferUnit -> TransferRate
 convertRate rate to | unit rate < to = convertRate (convertRateUp rate) to
-  where convertRateUp (TransferRate rate from) = (TransferRate (rate `div` 1024) (succ from))
+  where convertRateUp (TransferRate rate from) = (TransferRate (rate / 1024) (succ from))
 convertRate rate to | unit rate > to = convertRate (convertRateDown rate) to
   where convertRateDown (TransferRate rate from) = (TransferRate (rate * 1024) (pred from))
 convertRate rate _  | otherwise      = rate
