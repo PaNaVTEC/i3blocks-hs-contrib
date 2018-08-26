@@ -125,9 +125,18 @@ isUp interface = let state = inshell ("cat /sys/class/net/" <> interface <> "/op
                  in ("up" ==) . lineToText <$> state
 
 defaultInterface :: Shell (Maybe Text)
-defaultInterface = textToMaybe . strip <$>
-  (strict $ inshell ("ip route | awk '/^default/ { print $5 ; exit }'") mempty)
-  where textToMaybe text = bool (Just text) Nothing (Data.Text.null text)
+defaultInterface = safeHead . match parseInterface <$> onlyDefault
+
+parseInterface :: Pattern Text
+parseInterface = "default via " *> ip *> spaces1 *> "dev " *> (star alphaNum) <* star anyChar
+  where
+    ip = segment >> "." >> segment >> "." >> segment >> "." >> segment
+    segment = bounded 1 3 (decimal :: Pattern Integer)
+
+onlyDefault :: Shell Text
+onlyDefault = strict $ grep parseLineWithDefault (inshell "ip route" mempty)
+  where
+    parseLineWithDefault = "default" *> star anyChar
 
 readBytesTransfered :: Text -> Shell TotalBytesOut
 readBytesTransfered interface = TotalBytesOut <$> readNumberFrom command
@@ -139,3 +148,7 @@ readBytesReceived interface = TotalBytesIn <$> readNumberFrom command
 
 readNumberFrom :: Text -> Shell Integer
 readNumberFrom command = read . unpack . strip <$> (strict $ inshell command mempty)
+
+safeHead :: [a] -> Maybe a
+safeHead []      = Nothing
+safeHead (a : _) = Just a
