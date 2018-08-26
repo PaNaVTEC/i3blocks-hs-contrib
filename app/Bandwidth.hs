@@ -73,9 +73,7 @@ writeRecord interface path =
            show . runTotalBytesOut . bytesSent $ record,
            "\n"]
         poxisTimeAsInteger = round <$> getPOSIXTime
-        writeRecordToFile record = do
-          (writeTextFile path) . recordToText $ record
-          return record
+        writeRecordToFile record = (writeTextFile path . recordToText $ record) *> return record
 
 readRecord :: FilePath -> Shell (Maybe Record)
 readRecord path = liftIO . runMaybeT $ extractRecord =<< safeReadTextFile
