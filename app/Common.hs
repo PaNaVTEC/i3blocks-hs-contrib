@@ -4,6 +4,7 @@ module Common where
 
 import           Turtle
 import           Data.Text (pack, unpack)
+import           Data.Text.IO (putStrLn)
 import           Numeric
 
 processIsRunning :: String -> Shell Bool
@@ -42,10 +43,10 @@ data OutputReport = OutputReport {
 
 blockOutput :: MonadIO io => OutputReport -> io ()
 blockOutput report = do
-  let longDesc' = (unpack . toText . longDesc $ report)
-  liftIO $ putStrLn $ longDesc'
-  liftIO $ putStrLn $ maybe longDesc' (unpack . toText') (shortDesc report)
-  liftIO $ putStrLn $ maybe "" (unpack . toText'') (color report)
+  let longDesc' = (toText . longDesc $ report)
+  liftIO $ Data.Text.IO.putStrLn $ longDesc'
+  liftIO $ Data.Text.IO.putStrLn $ maybe longDesc' toText' (shortDesc report)
+  liftIO $ Data.Text.IO.putStrLn $ maybe "" toText'' (color report)
   where
     toText (LongDesc t) = t
     toText' (ShortDesc t) = t
