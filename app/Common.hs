@@ -3,7 +3,8 @@
 module Common where
 
 import           Turtle
-import           Data.Text (pack)
+import           Data.Text (pack, unpack)
+import           Data.Text.IO (putStrLn)
 import           Numeric
 
 processIsRunning :: String -> Shell Bool
@@ -30,3 +31,23 @@ buttonClicked :: MonadIO io => Button -> io Bool
 buttonClicked but = toBoolean <$> currentButton
   where
     toBoolean = maybe False (== but)
+
+newtype LongDesc = LongDesc Text deriving (Eq, Show)
+newtype ShortDesc = ShortDesc Text deriving (Eq, Show)
+newtype Color = Color Text deriving (Eq, Show)
+data OutputReport = OutputReport {
+  longDesc :: LongDesc,
+  shortDesc :: Maybe ShortDesc,
+  color :: Maybe Color
+}
+
+blockOutput :: MonadIO io => OutputReport -> io ()
+blockOutput report = do
+  let longDesc' = (toText . longDesc $ report)
+  liftIO $ Data.Text.IO.putStrLn $ longDesc'
+  liftIO $ Data.Text.IO.putStrLn $ maybe longDesc' toText' (shortDesc report)
+  liftIO $ Data.Text.IO.putStrLn $ maybe "" toText'' (color report)
+  where
+    toText (LongDesc t) = t
+    toText' (ShortDesc t) = t
+    toText'' (Color t) = t
