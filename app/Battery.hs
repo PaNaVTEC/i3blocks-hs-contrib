@@ -2,6 +2,7 @@
 
 import           Data.Text (pack)
 import           Turtle
+import           Common
 
 newtype BatteryPercentage = BatteryPercentage Integer
 data BatteryStatus = Discharging | Charging | Plugged | Unknown
@@ -11,7 +12,10 @@ main :: IO ()
 main = sh $ do
   acpi <- acpi'
   info <- return $ parse acpi
-  liftIO $ putStrLn $ formatBattery info
+  blockOutput $ OutputReport (makeLongDesc info) Nothing (makeColor $ fst info)
+  where
+    makeLongDesc = LongDesc . pack . formatBattery
+    makeColor (BatteryPercentage per) = Color <$> batteryColor per
 
 formatBattery :: (BatteryPercentage, BatteryStatus) -> String
 formatBattery (BatteryPercentage per, Discharging) = format' (icon per) per
@@ -26,6 +30,10 @@ icon p | p >= 75 = "\62017"
 icon p | p >= 50 = "\62018"
 icon p | p >= 25 = "\62019"
 icon _ = "\62020"
+
+batteryColor :: Integer -> Maybe Text
+batteryColor p | p <= 25 = Just "#ff0000"
+batteryColor _ = Nothing
 
 parse :: Text -> (BatteryPercentage, BatteryStatus)
 parse acpi = head $ match batteryLeft acpi
