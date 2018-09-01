@@ -5,7 +5,7 @@ import           Turtle
 import           Common
 
 newtype BatteryPercentage = BatteryPercentage Integer
-data BatteryStatus = Discharging | Charging | Plugged | Unknown
+data BatteryStatus = Discharging | Charging | Full | Plugged | Unknown
 data MemType = MemTotal | MemFree
 
 main :: IO ()
@@ -49,6 +49,7 @@ batteryLeft = do
     toBatteryStatus "Discharging" = Discharging
     toBatteryStatus "Charging"    = Charging
     toBatteryStatus "Plugged"     = Plugged
+    toBatteryStatus "Full"        = Full
     toBatteryStatus _ = Unknown
 
 acpi' :: Shell Text
