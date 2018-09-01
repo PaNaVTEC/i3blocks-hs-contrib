@@ -20,7 +20,7 @@ main = sh $ do
 formatBattery :: (BatteryPercentage, BatteryStatus) -> String
 formatBattery (BatteryPercentage per, Discharging) = format' (icon per) per
 formatBattery (BatteryPercentage per, Unknown) =  format' (icon per) per
-formatBattery (BatteryPercentage per, _) =  format' "\61926 " per
+formatBattery (BatteryPercentage per, _) = format' "\61926 " per
 
 format' i per = i ++ " " ++ show per ++ "%"
 
