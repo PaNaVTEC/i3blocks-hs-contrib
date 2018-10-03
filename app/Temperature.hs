@@ -1,12 +1,13 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+import           Data.Text    (strip)
 import           Data.Text.IO (putStrLn)
+import           Prelude      hiding (putStrLn)
 import           Turtle
-import           Prelude hiding (putStrLn)
 
 main :: IO ()
 main = sh $ liftIO . putStrLn =<< cpuTemperature
 
 cpuTemperature :: Shell Text
-cpuTemperature = strict $
-  inshell ("sensors | grep -oP 'Package.*?\\+\\K[0-9.°C]+'") mempty
+cpuTemperature = (<> "°C") . strip <$>
+  strict (inshell "sensors | grep -oP 'Package[^\\+]*\\+\\K[0-9]+'" mempty)
