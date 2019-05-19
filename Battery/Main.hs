@@ -1,4 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TypeApplications  #-}
+
+module Main where
 
 import           Common
 import           Data.Text (pack)
@@ -19,9 +22,10 @@ main = sh $ do
 
 formatBattery :: (BatteryPercentage, BatteryStatus) -> String
 formatBattery (BatteryPercentage per, Discharging) = format' (icon per) per
-formatBattery (BatteryPercentage per, Unknown)     =  format' (icon per) per
+formatBattery (BatteryPercentage per, Unknown)     = format' (icon per) per
 formatBattery (BatteryPercentage per, _)           = format' "\61926 " per
 
+format' :: Show a => String -> a -> String
 format' i per = i ++ " " ++ show per ++ "%"
 
 icon :: Integer -> String
@@ -40,12 +44,12 @@ parse acpi = head $ match batteryLeft acpi
 
 batteryLeft :: Pattern (BatteryPercentage, BatteryStatus)
 batteryLeft = do
-  batteryNumber
+  _ <- batteryNumber
   state <- spaces1 *> chars1 <* ","
   per <- spaces1 *> decimal <* "%" <* ("," <|> "") <* spaces1 <* star anyChar
   return (BatteryPercentage per, toBatteryStatus state)
   where
-    batteryNumber = "Battery" *> spaces1 *> decimal *> ":"
+    batteryNumber = "Battery" *> spaces1 *> decimal @Integer *> ":"
     toBatteryStatus "Discharging" = Discharging
     toBatteryStatus "Charging"    = Charging
     toBatteryStatus "Plugged"     = Plugged

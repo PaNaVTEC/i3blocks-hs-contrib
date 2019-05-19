@@ -1,5 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+module Main where
+
 import           Common
 import           Data.Text (pack)
 import           Turtle

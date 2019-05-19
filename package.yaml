@@ -1,0 +1,125 @@
+name: i3blocks-hs-contrib
+version: "1.0.0"
+synopsis: Base i3blocks written in haskell
+license: MIT
+author:
+  - Christian Panadero <panavtec@gmail.com>
+  - Carlos Morera <carlosdelachica@gmail.com>
+category: Tools
+description: >
+  @i3blocks-hs-contrib@ defines a set of blocks for your i3 bar
+tested-with:   GHC == 8.4.*
+             , GHC == 8.6.*
+
+github: panavtec/i3blocks-hs-contrib
+
+ghc-options: -Wall
+
+dependencies:
+  - base >= 4.3 && < 5
+  - text
+  - turtle
+
+library:
+  source-dirs: src
+  exposed-modules:
+    - Common
+
+executables:
+
+  AirplaneMode:
+    main: Main.hs
+    source-dirs:
+      - AirplaneMode
+      - src
+
+  Bandwidth:
+    main: Main.hs
+    source-dirs: Bandwidth
+    dependencies:
+    - turtle
+    - time
+    - transformers
+
+  Battery:
+    main: Main.hs
+    source-dirs:
+      - Battery
+      - src
+    dependencies:
+    - turtle
+
+  Bitcoin:
+    main: Main.hs
+    source-dirs: Bitcoin
+    dependencies:
+    - aeson
+    - attoparsec
+    - wreq
+    - lens
+    - lens-aeson
+
+  Cpu:
+    main: Main.hs
+    source-dirs:
+      - Cpu
+      - src
+    dependencies:
+    - turtle
+
+  DateTime:
+    main: Main.hs
+    source-dirs: DateTime
+    dependencies:
+    - turtle
+    - time
+
+  Docker:
+    main: Main.hs
+    source-dirs:
+      - Docker
+      - src
+    dependencies:
+    - turtle
+
+  Ip:
+    main: Main.hs
+    source-dirs: Ip
+    dependencies:
+    - turtle
+
+  Memory:
+    main: Main.hs
+    source-dirs:
+      - Memory
+      - src
+    dependencies:
+    - turtle
+
+  OpenVpn:
+    main: Main.hs
+    source-dirs:
+      - OpenVpn
+      - src
+    dependencies:
+    - turtle
+
+  Temperature:
+    main: Main.hs
+    source-dirs: Temperature
+    dependencies:
+    - turtle
+
+  Volume:
+    main: Main.hs
+    source-dirs:
+      - Volume
+      - src
+    dependencies:
+    - turtle
+
+  Wifi:
+    main: Main.hs
+    source-dirs: Wifi
+    dependencies:
+    - turtle

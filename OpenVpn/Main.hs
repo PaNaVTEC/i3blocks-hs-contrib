@@ -1,5 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+module Main where
+
 import           Common
 import           Control.Applicative (liftA3)
 import           Data.Bool           (bool)

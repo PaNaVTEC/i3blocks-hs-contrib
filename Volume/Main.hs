@@ -1,5 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+module Main where
+
 import           Common
 import           Control.Applicative (liftA2)
 import           Data.Maybe          (maybe)
@@ -16,6 +18,7 @@ handleButton LeftClick  = shell "pavucontrol" empty
 handleButton RightClick = shell "ponymix toggle >/dev/null" empty
 handleButton WheelUp    = shell "ponymix increase 5 >/dev/null" empty
 handleButton WheelDown  = shell "ponymix decrease 5 >/dev/null" empty
+handleButton _          = pure . ExitFailure $ 1
 
 formatVol :: Bool -> Integer -> String
 formatVol True _    = "\61478 x"

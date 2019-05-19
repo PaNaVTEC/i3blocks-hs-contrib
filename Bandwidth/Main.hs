@@ -1,4 +1,7 @@
+{-# LANGUAGE LambdaCase        #-}
 {-# LANGUAGE OverloadedStrings #-}
+
+module Main where
 
 import           Control.Applicative       (liftA3)
 import           Control.Exception         (try)
@@ -64,7 +67,7 @@ initPath interface = do
 
 runScript :: NetworkInterface -> Shell String
 runScript interface = do
-        initPath interface
+        _ <- initPath interface
         liftA3 bool
                (handleInterfaceDown interface)
                (handleInterfaceUp interface)
@@ -122,19 +125,19 @@ readRecord interface = liftIO . runMaybeT $ extractRecord =<< safeReadTextFile
                                     )
         extractRecord =
                 MaybeT . return . matchToMaybe . match (decimal `sepBy` " ")
-        matchToMaybe x = case x of
-                [[time, received, sent]] -> Just $ Record
-                        time
+        matchToMaybe = \case
+                [[time', received, sent]] -> Just $ Record
+                        time'
                         (TotalBytesIn received)
                         (TotalBytesOut sent)
                 _ -> Nothing
         tryToMaybe :: Either IOError b -> Maybe b
-        tryToMaybe (Left  _) = Nothing
-        tryToMaybe (Right x) = Just x
+        tryToMaybe (Left  _)  = Nothing
+        tryToMaybe (Right x') = Just x'
 
 speedReport :: Record -> Record -> Report
-speedReport oldRecord newRecord = Report (UploadRate uploadRate)
-                                         (DownloadRate downloadRate)
+speedReport oldRecord newRecord = Report (UploadRate uploadRate')
+                                         (DownloadRate downloadRate')
     where
         timediff = max (timestamp newRecord - timestamp oldRecord) 1
         bytesReceivedDiff =
@@ -143,10 +146,10 @@ speedReport oldRecord newRecord = Report (UploadRate uploadRate)
         bytesSentDiff =
                 runTotalBytesOut (bytesSent newRecord)
                         - runTotalBytesOut (bytesSent oldRecord)
-        downloadRate = TransferRate
+        downloadRate' = TransferRate
                 (fromIntegral bytesReceivedDiff / fromIntegral timediff)
                 Bs
-        uploadRate = TransferRate
+        uploadRate' = TransferRate
                 (fromIntegral bytesSentDiff / fromIntegral timediff)
                 Bs
 
@@ -183,9 +186,9 @@ applyBestUnit = liftA2
 convertRate :: TransferRate -> TransferUnit -> TransferRate
 convertRate rate to | unit rate < to = convertRate (convertRateUp rate) to
     where
-        convertRateUp (TransferRate rate from)
-          = TransferRate (rate / 1024) (succ from)
-convertRate rate to | unit rate > to = convertRate (convertRateDown rate) to
+        convertRateUp (TransferRate rate' from)
+          = TransferRate (rate' / 1024) (succ from)
+convertRate rate' to | unit rate' > to = convertRate (convertRateDown rate') to
     where
         convertRateDown (TransferRate rate from)
           = TransferRate (rate * 1024) (pred from)
@@ -206,7 +209,7 @@ defaultInterface =
                             "ip route | awk '/^default/ { print $5 ; exit }'"
                             mempty
                     )
-        where textToMaybe text = bool (Just text) Nothing (Data.Text.null text)
+        where textToMaybe text' = bool (Just text') Nothing (Data.Text.null text')
 
 readBytesTransfered :: Text -> Shell TotalBytesOut
 readBytesTransfered interface =

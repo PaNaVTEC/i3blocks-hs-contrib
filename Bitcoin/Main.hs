@@ -1,5 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+module Main where
+
 import           Control.Lens
 import           Data.Aeson
 import           Data.Aeson.Lens
@@ -10,6 +12,7 @@ main :: IO ()
 main = do
   response <- get "https://api.gdax.com/products/BTC-EUR/ticker"
   let ask' = response ^? responseBody . key "ask"
+
   putStrLn $ formatValue ask'
 
 formatValue :: Maybe Value -> String

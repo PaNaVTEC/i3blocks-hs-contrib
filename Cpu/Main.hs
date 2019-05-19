@@ -1,5 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+module Main where
+
 import           Common
 import           Data.Text (pack, strip, unpack)
 import           Turtle
@@ -10,8 +12,8 @@ main = sh $ do
   maybe (return ExitSuccess) handleButton =<< currentButton
 
 cpuUsage :: Shell String
-cpuUsage = format <$> idleCpu
-  where format idle =
+cpuUsage = format' <$> idleCpu
+  where format' idle =
           let usage = formatFloatN (100 - idle) 0
           in "\61668 " ++ usage ++ "%"
 

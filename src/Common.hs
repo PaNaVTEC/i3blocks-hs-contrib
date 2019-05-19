@@ -2,7 +2,7 @@
 
 module Common where
 
-import           Data.Text    (pack, unpack)
+import           Data.Text    (pack)
 import           Data.Text.IO (putStrLn)
 import           Numeric
 import           Turtle
@@ -41,11 +41,11 @@ data OutputReport = OutputReport {
 
 blockOutput :: MonadIO io => OutputReport -> io ()
 blockOutput report = do
-  let longDesc' = toText . longDesc $ report
+  let longDesc' = toText' . longDesc $ report
   liftIO $ Data.Text.IO.putStrLn longDesc'
-  liftIO $ Data.Text.IO.putStrLn $ maybe longDesc' toText' (shortDesc report)
-  liftIO $ Data.Text.IO.putStrLn $ maybe "" toText'' (color report)
+  liftIO $ Data.Text.IO.putStrLn $ maybe longDesc' toText'' (shortDesc report)
+  liftIO $ Data.Text.IO.putStrLn $ maybe "" toText''' (color report)
   where
-    toText (LongDesc t) = t
-    toText' (ShortDesc t) = t
-    toText'' (Color t) = t
+    toText' (LongDesc t) = t
+    toText'' (ShortDesc t) = t
+    toText''' (Color t) = t

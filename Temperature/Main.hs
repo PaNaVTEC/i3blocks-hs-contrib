@@ -1,5 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+module Main where
+
 import           Data.Text    (strip)
 import           Data.Text.IO (putStrLn)
 import           Prelude      hiding (putStrLn)

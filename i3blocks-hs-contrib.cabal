@@ -1,151 +1,230 @@
-name:                i3blocks-hs-contrib
-version:             0.1.0.0
--- synopsis:
--- description:
-homepage:            https://github.com/panavtec/i3blocks-hs-contrib#readme
-license:             BSD3
-license-file:        LICENSE
-author:              Christian Panadero
-maintainer:          panavtec@gmail.com
-copyright:           Apache2
-category:            i3blocks
-build-type:          Simple
-extra-source-files:  README.md
-cabal-version:       >=1.10
+cabal-version: 1.12
 
-executable AirplaneMode
-  hs-source-dirs:      app
-  main-is:             AirplaneMode.hs
-  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
-  build-depends:       base
-                     , turtle
-                     , text
-  default-language:    Haskell2010
+-- This file has been generated from package.yaml by hpack version 0.31.1.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 00feb8d1ff917f691ea2ef9cfa2adbdc242fb4a1d5e41fc715d9c6789b25b6ea
 
-executable Battery
-  hs-source-dirs:      app
-  main-is:             Battery.hs
-  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
-  build-depends:       base
-                     , turtle
-                     , text
-  default-language:    Haskell2010
-
-executable Bitcoin
-  hs-source-dirs:      app
-  main-is:             Bitcoin.hs
-  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
-  build-depends:       base
-                     , aeson
-                     , text
-                     , attoparsec
-                     , wreq
-                     , lens
-                     , lens-aeson
-  default-language:    Haskell2010
-
-executable Cpu
-  hs-source-dirs:      app
-  main-is:             Cpu.hs
-  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
-  build-depends:       base
-                     , turtle
-                     , text
-  default-language:    Haskell2010
-
-executable DateTime
-  hs-source-dirs:      app
-  main-is:             DateTime.hs
-  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
-  build-depends:       base
-                     , turtle
-                     , time
-  default-language:    Haskell2010
-
-executable Docker
-  hs-source-dirs:      app
-  main-is:             Docker.hs
-  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
-  build-depends:       base
-                     , turtle
-                     , text
-  default-language:    Haskell2010
-
-executable Memory
-  hs-source-dirs:      app
-  main-is:             Memory.hs
-  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
-  build-depends:       base
-                     , turtle
-                     , text
-  default-language:    Haskell2010
-
-executable OpenVpn
-  hs-source-dirs:      app
-  main-is:             OpenVpn.hs
-  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
-  build-depends:       base
-                     , turtle
-                     , text
-  default-language:    Haskell2010
-
-executable Volume
-  hs-source-dirs:      app
-  main-is:             Volume.hs
-  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
-  build-depends:       base
-                     , turtle
-                     , text
-  default-language:    Haskell2010
-
-executable Wifi
-  hs-source-dirs:      app
-  main-is:             Wifi.hs
-  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
-  build-depends:       base
-                     , turtle
-                     , text
-  default-language:    Haskell2010
-
-executable Ip 
-  hs-source-dirs:      app
-  main-is:             Ip.hs
-  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
-  build-depends:       base
-                     , turtle
-                     , text
-  default-language:    Haskell2010
-
-executable Temperature 
-  hs-source-dirs:      app
-  main-is:             Temperature.hs
-  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
-  build-depends:       base
-                     , turtle
-                     , text
-  default-language:    Haskell2010
-
-executable Bandwidth
-  hs-source-dirs:      app
-  main-is:             Bandwidth.hs
-  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
-  build-depends:       base
-                     , turtle
-                     , text
-                     , time
-                     , transformers
-  default-language:    Haskell2010
-test-suite i3blocks-hs-contrib-test
-  type:                exitcode-stdio-1.0
-  hs-source-dirs:      test
-  main-is:             Spec.hs
-  build-depends:       base
-                     , i3blocks-hs-contrib
-                     , hspec
-                     , QuickCheck
-  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
-  default-language:    Haskell2010
+name:           i3blocks-hs-contrib
+version:        1.0.0
+synopsis:       Base i3blocks written in haskell
+description:    @i3blocks-hs-contrib@ defines a set of blocks for your i3 bar
+homepage:       https://github.com/panavtec/i3blocks-hs-contrib#readme
+bug-reports:    https://github.com/panavtec/i3blocks-hs-contrib/issues
+license:        MIT
+license-file:   LICENSE
+tested-with:    GHC == 8.4.* , GHC == 8.6.*
+author:         Christian Panadero <panavtec@gmail.com>,
+                Carlos Morera <carlosdelachica@gmail.com>
+category:       Tools
+build-type:     Simple
 
 source-repository head
-  type:     git
+  type: git
   location: https://github.com/panavtec/i3blocks-hs-contrib
+
+library
+  exposed-modules:
+      Common
+  other-modules:
+      Paths_i3blocks_hs_contrib
+  hs-source-dirs:
+      src
+  ghc-options: -Wall
+  build-depends:
+      base >=4.3 && <5
+    , text
+    , turtle
+  default-language: Haskell2010
+
+executable AirplaneMode
+  main-is: Main.hs
+  other-modules:
+      Common
+      Paths_i3blocks_hs_contrib
+  hs-source-dirs:
+      AirplaneMode
+      src
+  ghc-options: -Wall
+  build-depends:
+      base >=4.3 && <5
+    , text
+    , turtle
+  default-language: Haskell2010
+
+executable Bandwidth
+  main-is: Main.hs
+  other-modules:
+      Paths_i3blocks_hs_contrib
+  hs-source-dirs:
+      Bandwidth
+  ghc-options: -Wall
+  build-depends:
+      base >=4.3 && <5
+    , text
+    , time
+    , transformers
+    , turtle
+  default-language: Haskell2010
+
+executable Battery
+  main-is: Main.hs
+  other-modules:
+      Common
+      Paths_i3blocks_hs_contrib
+  hs-source-dirs:
+      Battery
+      src
+  ghc-options: -Wall
+  build-depends:
+      base >=4.3 && <5
+    , text
+    , turtle
+  default-language: Haskell2010
+
+executable Bitcoin
+  hs-source-dirs:
+      Bitcoin
+  main-is: Main.hs
+  other-modules:
+      Paths_i3blocks_hs_contrib
+  ghc-options: -Wall
+  build-depends:
+      aeson
+    , attoparsec
+    , base >=4.3 && <5
+    , lens
+    , lens-aeson
+    , text
+    , turtle
+    , wreq
+  default-language: Haskell2010
+
+executable Cpu
+  main-is: Main.hs
+  other-modules:
+      Common
+      Paths_i3blocks_hs_contrib
+  hs-source-dirs:
+      Cpu
+      src
+  ghc-options: -Wall
+  build-depends:
+      base >=4.3 && <5
+    , text
+    , turtle
+  default-language: Haskell2010
+
+executable DateTime
+  main-is: Main.hs
+  other-modules:
+      Paths_i3blocks_hs_contrib
+  hs-source-dirs:
+      DateTime
+  ghc-options: -Wall
+  build-depends:
+      base >=4.3 && <5
+    , text
+    , time
+    , turtle
+  default-language: Haskell2010
+
+executable Docker
+  main-is: Main.hs
+  other-modules:
+      Common
+      Paths_i3blocks_hs_contrib
+  hs-source-dirs:
+      Docker
+      src
+  ghc-options: -Wall
+  build-depends:
+      base >=4.3 && <5
+    , text
+    , turtle
+  default-language: Haskell2010
+
+executable Ip
+  main-is: Main.hs
+  other-modules:
+      Paths_i3blocks_hs_contrib
+  hs-source-dirs:
+      Ip
+  ghc-options: -Wall
+  build-depends:
+      base >=4.3 && <5
+    , text
+    , turtle
+  default-language: Haskell2010
+
+executable Memory
+  main-is: Main.hs
+  other-modules:
+      Common
+      Paths_i3blocks_hs_contrib
+  hs-source-dirs:
+      Memory
+      src
+  ghc-options: -Wall
+  build-depends:
+      base >=4.3 && <5
+    , text
+    , turtle
+  default-language: Haskell2010
+
+executable OpenVpn
+  main-is: Main.hs
+  other-modules:
+      Common
+      Paths_i3blocks_hs_contrib
+  hs-source-dirs:
+      OpenVpn
+      src
+  ghc-options: -Wall
+  build-depends:
+      base >=4.3 && <5
+    , text
+    , turtle
+  default-language: Haskell2010
+
+executable Temperature
+  main-is: Main.hs
+  other-modules:
+      Paths_i3blocks_hs_contrib
+  hs-source-dirs:
+      Temperature
+  ghc-options: -Wall
+  build-depends:
+      base >=4.3 && <5
+    , text
+    , turtle
+  default-language: Haskell2010
+
+executable Volume
+  main-is: Main.hs
+  other-modules:
+      Common
+      Paths_i3blocks_hs_contrib
+  hs-source-dirs:
+      Volume
+      src
+  ghc-options: -Wall
+  build-depends:
+      base >=4.3 && <5
+    , text
+    , turtle
+  default-language: Haskell2010
+
+executable Wifi
+  main-is: Main.hs
+  other-modules:
+      Paths_i3blocks_hs_contrib
+  hs-source-dirs:
+      Wifi
+  ghc-options: -Wall
+  build-depends:
+      base >=4.3 && <5
+    , text
+    , turtle
+  default-language: Haskell2010

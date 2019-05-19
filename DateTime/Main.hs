@@ -1,3 +1,6 @@
+module Main where
+
+import           Data.Maybe          (fromMaybe)
 import           Data.Time.Format
 import           Data.Time.LocalTime
 import           System.Environment
@@ -7,9 +10,9 @@ main = do
   args <- getArgs
   getZonedTime >>= printDateTime . formatTime defaultTimeLocale (format $ safeHead args)
   where
-    format = maybe "%d-%m-%y %H:%M" id
+    format = fromMaybe "%d-%m-%y %H:%M"
     printDateTime datetime = putStrLn $ "\61747  " ++ datetime
 
 safeHead :: [a] -> Maybe a
-safeHead l         | length l > 0 = Just $ head l
-safeHead         _ = Nothing
+safeHead l | not (null l) = Just $ head l
+safeHead _ = Nothing

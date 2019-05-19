@@ -1,5 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+module Main where
+
 import           Common
 import           Data.Bool
 import           Data.Text (lines, pack)
