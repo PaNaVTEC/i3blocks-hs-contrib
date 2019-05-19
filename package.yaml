@@ -5,11 +5,16 @@ license: MIT
 author:
   - Christian Panadero <panavtec@gmail.com>
   - Carlos Morera <carlosdelachica@gmail.com>
-category: Tools
+maintainer:
+  - Christian Panadero <panavtec@gmail.com>
+  - Carlos Morera <carlosdelachica@gmail.com>
+category: Distribution
 description: >
   @i3blocks-hs-contrib@ defines a set of blocks for your i3 bar
 tested-with:   GHC == 8.4.*
              , GHC == 8.6.*
+extra-source-files:
+- CHANGELOG.md
 
 github: panavtec/i3blocks-hs-contrib
 

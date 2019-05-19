@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 6a1661c8f0aa298adaca9b9a52c700af7495c25cca5b58bdb24de3f731d8f7eb
+-- hash: 2848a3939923d85f2e41f6999eefbcfd33f0081ad14ce24fa91f6afb64f8e34d
 
 name:           i3blocks-hs-contrib
 version:        1.0.0
@@ -17,8 +17,12 @@ license-file:   LICENSE
 tested-with:    GHC == 8.4.* , GHC == 8.6.*
 author:         Christian Panadero <panavtec@gmail.com>,
                 Carlos Morera <carlosdelachica@gmail.com>
-category:       Tools
+maintainer:     Christian Panadero <panavtec@gmail.com>,
+                Carlos Morera <carlosdelachica@gmail.com>
+category:       Distribution
 build-type:     Simple
+extra-source-files:
+    CHANGELOG.md
 
 source-repository head
   type: git
