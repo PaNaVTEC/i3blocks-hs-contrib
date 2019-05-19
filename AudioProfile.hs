@@ -12,7 +12,7 @@ newtype AudioProfile = AudioProfile (Maybe Input, Output) deriving Show
 
 main :: IO ()
 main = sh $ do
-  profile <- last <$> match parseAudioProfile <$> outputSource
+  profile <- last . match parseAudioProfile <$> outputSource
   liftIO $ putStrLn $ formatProfile profile
   button <- currentButton
   handleButton button
@@ -25,7 +25,7 @@ handleButton (Just WheelDown)  = shell "ponymix decrease 5 >/dev/null" empty
 handleButton _                 = return ExitSuccess
 
 formatProfile :: AudioProfile -> String
-formatProfile (AudioProfile (_, (Output out))) = unpack out
+formatProfile (AudioProfile (_, Output out)) = unpack out
 
 outputSource :: Shell Text
 outputSource = lineToText <$> inshell (pack "ponymix get-profile") empty

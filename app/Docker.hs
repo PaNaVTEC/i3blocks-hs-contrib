@@ -7,9 +7,9 @@ import           Turtle
 main :: IO ()
 main = sh $ do
   isRunning <- processIsRunning "dockerd"
-  case isRunning of
-    False -> formatCommand (return "x")
-    True  -> formatCommand (show <$> nImages)
+  if isRunning
+  then formatCommand (show <$> nImages)
+  else formatCommand (return "x")
 
 formatCommand :: Shell String -> Shell ()
 formatCommand out = do

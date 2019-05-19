@@ -1,8 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+import           Common
 import           Data.Text (pack)
 import           Turtle
-import           Common
 
 newtype BatteryPercentage = BatteryPercentage Integer
 data BatteryStatus = Discharging | Charging | Full | Plugged | Unknown
@@ -11,7 +11,7 @@ data MemType = MemTotal | MemFree
 main :: IO ()
 main = sh $ do
   acpi <- acpi'
-  info <- return $ parse acpi
+  let info = parse acpi
   blockOutput $ OutputReport (makeLongDesc info) Nothing (makeColor $ fst info)
   where
     makeLongDesc = LongDesc . pack . formatBattery
@@ -19,8 +19,8 @@ main = sh $ do
 
 formatBattery :: (BatteryPercentage, BatteryStatus) -> String
 formatBattery (BatteryPercentage per, Discharging) = format' (icon per) per
-formatBattery (BatteryPercentage per, Unknown) =  format' (icon per) per
-formatBattery (BatteryPercentage per, _) = format' "\61926 " per
+formatBattery (BatteryPercentage per, Unknown)     =  format' (icon per) per
+formatBattery (BatteryPercentage per, _)           = format' "\61926 " per
 
 format' i per = i ++ " " ++ show per ++ "%"
 
@@ -50,7 +50,7 @@ batteryLeft = do
     toBatteryStatus "Charging"    = Charging
     toBatteryStatus "Plugged"     = Plugged
     toBatteryStatus "Full"        = Full
-    toBatteryStatus _ = Unknown
+    toBatteryStatus _             = Unknown
 
 acpi' :: Shell Text
 acpi' = strict $ inshell (pack "acpi") empty

@@ -29,5 +29,5 @@ isMuted :: Shell Bool
 isMuted = (== ExitSuccess) <$> shell (pack "ponymix is-muted") empty
 
 getVolume :: Shell Integer
-getVolume = toVolumeInt <$> (strict $ inshell (pack "ponymix get-volume") empty)
+getVolume = toVolumeInt <$> strict (inshell (pack "ponymix get-volume") empty)
   where toVolumeInt = read . unpack . strip

@@ -9,7 +9,7 @@ import           Network.Wreq
 main :: IO ()
 main = do
   response <- get "https://api.gdax.com/products/BTC-EUR/ticker"
-  ask' <- return $ response ^? responseBody . key "ask"
+  let ask' = response ^? responseBody . key "ask"
   putStrLn $ formatValue ask'
 
 formatValue :: Maybe Value -> String

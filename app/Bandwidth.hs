@@ -5,6 +5,7 @@ import           Control.Exception         (try)
 import           Control.Monad.Trans.Maybe (MaybeT (..), runMaybeT)
 import           Data.Bool                 (bool)
 import           Data.Foldable             (fold)
+import           Data.Functor              (($>))
 import           Data.List                 (intersperse)
 import           Data.Maybe                (maybe)
 import           Data.Monoid               ((<>))
@@ -73,16 +74,15 @@ handleInterfaceDown :: NetworkInterface -> Shell String
 handleInterfaceDown interface = return . unpack $ interface <> " is down"
 
 handleInterfaceUp :: NetworkInterface -> Shell String
-handleInterfaceUp interface = maybe handleNoRecordAvailable handleRecord
-        =<< readRecord interface
+handleInterfaceUp interface =
+  maybe handleNoRecordAvailable handleRecord =<< readRecord interface
     where
-        handleRecord oldRecord =
-                return
-                        .   formatReport
-                        .   applyBestUnit
-                        .   speedReport oldRecord
-                        =<< writeRecord interface
-        handleNoRecordAvailable = writeRecord interface >>= return "No data"
+      handleRecord oldRecord =
+          formatReport
+          .   applyBestUnit
+          .   speedReport oldRecord
+          <$> writeRecord interface
+      handleNoRecordAvailable = writeRecord interface >>= return "No data"
 
 writeRecord :: NetworkInterface -> Shell Record
 writeRecord interface =
@@ -108,7 +108,7 @@ writeRecord interface =
                         . recordToText
                         $ record
                         )
-                        *> return record
+                        $> record
 
 readRecord :: NetworkInterface -> Shell (Maybe Record)
 readRecord interface = liftIO . runMaybeT $ extractRecord =<< safeReadTextFile
@@ -138,11 +138,11 @@ speedReport oldRecord newRecord = Report (UploadRate uploadRate)
     where
         timediff = max (timestamp newRecord - timestamp oldRecord) 1
         bytesReceivedDiff =
-                (runTotalBytesIn $ bytesReceived newRecord)
-                        - (runTotalBytesIn $ bytesReceived oldRecord)
+                runTotalBytesIn (bytesReceived newRecord)
+                        - runTotalBytesIn (bytesReceived oldRecord)
         bytesSentDiff =
-                (runTotalBytesOut $ bytesSent newRecord)
-                        - (runTotalBytesOut $ bytesSent oldRecord)
+                runTotalBytesOut (bytesSent newRecord)
+                        - runTotalBytesOut (bytesSent oldRecord)
         downloadRate = TransferRate
                 (fromIntegral bytesReceivedDiff / fromIntegral timediff)
                 Bs
@@ -153,7 +153,7 @@ speedReport oldRecord newRecord = Report (UploadRate uploadRate)
 formatReport :: Report -> String
 formatReport report =
         "\61677 "
-                ++ ( (printf "%.1f")
+                ++ ( printf "%.1f"
                    . value
                    . runDownloadRate
                    . downloadRate
@@ -162,7 +162,7 @@ formatReport report =
                 ++ (show . unit . runDownloadRate . downloadRate $ report)
                 ++ "  "
                 ++ "\61678 "
-                ++ ( (printf "%.1f")
+                ++ ( printf "%.1f"
                    . value
                    . runUploadRate
                    . uploadRate
@@ -177,19 +177,19 @@ applyBestUnit = liftA2
         (DownloadRate . applyBestUnit' . runDownloadRate . downloadRate)
     where
         applyBestUnit' transferRate | value transferRate < 1024 = transferRate
-        applyBestUnit' transferRate | otherwise                 = applyBestUnit'
+        applyBestUnit' transferRate = applyBestUnit'
                 $ convertRate transferRate (succ . unit $ transferRate)
 
 convertRate :: TransferRate -> TransferUnit -> TransferRate
 convertRate rate to | unit rate < to = convertRate (convertRateUp rate) to
     where
-        convertRateUp (TransferRate rate from) =
-                (TransferRate (rate / 1024) (succ from))
+        convertRateUp (TransferRate rate from)
+          = TransferRate (rate / 1024) (succ from)
 convertRate rate to | unit rate > to = convertRate (convertRateDown rate) to
     where
-        convertRateDown (TransferRate rate from) =
-                (TransferRate (rate * 1024) (pred from))
-convertRate rate _ | otherwise = rate
+        convertRateDown (TransferRate rate from)
+          = TransferRate (rate * 1024) (pred from)
+convertRate rate _ = rate
 
 isUp :: Text -> Shell Bool
 isUp interface
@@ -201,18 +201,17 @@ isUp interface
 
 defaultInterface :: Shell (Maybe NetworkInterface)
 defaultInterface =
-        textToMaybe
-                .   strip
-                <$> (strict $ inshell
-                            ("ip route | awk '/^default/ { print $5 ; exit }'")
+        textToMaybe . strip
+                <$> strict (inshell
+                            "ip route | awk '/^default/ { print $5 ; exit }'"
                             mempty
                     )
         where textToMaybe text = bool (Just text) Nothing (Data.Text.null text)
 
 readBytesTransfered :: Text -> Shell TotalBytesOut
 readBytesTransfered interface =
-        (TotalBytesOut . read . unpack . strip)
-                <$> (strict $ inshell
+        TotalBytesOut . read . unpack . strip
+                <$> strict (inshell
                             (  "cat /sys/class/net/"
                             <> interface
                             <> "/statistics/tx_bytes"
@@ -222,8 +221,8 @@ readBytesTransfered interface =
 
 readBytesReceived :: Text -> Shell TotalBytesIn
 readBytesReceived interface =
-        (TotalBytesIn . read . unpack . strip)
-                <$> (strict $ inshell
+        TotalBytesIn . read . unpack . strip
+                <$> strict (inshell
                             (  "cat /sys/class/net/"
                             <> interface
                             <> "/statistics/rx_bytes"

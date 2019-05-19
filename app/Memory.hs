@@ -20,7 +20,7 @@ memory = do
   where
     kbsToGb kbs = kbs / 1024 / 1024
     parseMemory memoryReport k =
-      head <$> match (parseMem k) <$> (strict $ grep (parseMem k) memoryReport)
+      head . match (parseMem k) <$> strict (grep (parseMem k) memoryReport)
 
 parseMem :: MemType -> Pattern Integer
 parseMem memType = parseMemType memType *> spaces1 *> decimal <* star anyChar
