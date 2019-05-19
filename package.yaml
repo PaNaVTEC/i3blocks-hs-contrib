@@ -17,8 +17,8 @@ ghc-options: -Wall
 
 dependencies:
   - base >= 4.3 && < 5
-  - text
-  - turtle
+  - text < 1.3
+  - turtle < 1.6
 
 library:
   source-dirs: src
@@ -37,89 +37,69 @@ executables:
     main: Main.hs
     source-dirs: Bandwidth
     dependencies:
-    - turtle
-    - time
-    - transformers
+    - time < 1.9
+    - transformers < 0.6
 
   Battery:
     main: Main.hs
     source-dirs:
       - Battery
       - src
-    dependencies:
-    - turtle
 
   Bitcoin:
     main: Main.hs
     source-dirs: Bitcoin
     dependencies:
-    - aeson
-    - attoparsec
-    - wreq
-    - lens
-    - lens-aeson
+    - aeson < 1.5
+    - attoparsec < 0.14
+    - wreq < 0.5
+    - lens < 4.2
+    - lens-aeson < 1.1
 
   Cpu:
     main: Main.hs
     source-dirs:
       - Cpu
       - src
-    dependencies:
-    - turtle
 
   DateTime:
     main: Main.hs
     source-dirs: DateTime
     dependencies:
-    - turtle
-    - time
+    - time < 1.9
 
   Docker:
     main: Main.hs
     source-dirs:
       - Docker
       - src
-    dependencies:
-    - turtle
 
   Ip:
     main: Main.hs
     source-dirs: Ip
-    dependencies:
-    - turtle
 
   Memory:
     main: Main.hs
     source-dirs:
       - Memory
       - src
-    dependencies:
-    - turtle
 
   OpenVpn:
     main: Main.hs
     source-dirs:
       - OpenVpn
       - src
-    dependencies:
-    - turtle
 
   Temperature:
     main: Main.hs
     source-dirs: Temperature
-    dependencies:
-    - turtle
 
   Volume:
     main: Main.hs
     source-dirs:
       - Volume
       - src
-    dependencies:
-    - turtle
 
   Wifi:
     main: Main.hs
     source-dirs: Wifi
-    dependencies:
-    - turtle

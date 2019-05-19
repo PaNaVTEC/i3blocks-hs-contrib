@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 00feb8d1ff917f691ea2ef9cfa2adbdc242fb4a1d5e41fc715d9c6789b25b6ea
+-- hash: 6a1661c8f0aa298adaca9b9a52c700af7495c25cca5b58bdb24de3f731d8f7eb
 
 name:           i3blocks-hs-contrib
 version:        1.0.0
@@ -34,8 +34,8 @@ library
   ghc-options: -Wall
   build-depends:
       base >=4.3 && <5
-    , text
-    , turtle
+    , text <1.3
+    , turtle <1.6
   default-language: Haskell2010
 
 executable AirplaneMode
@@ -49,8 +49,8 @@ executable AirplaneMode
   ghc-options: -Wall
   build-depends:
       base >=4.3 && <5
-    , text
-    , turtle
+    , text <1.3
+    , turtle <1.6
   default-language: Haskell2010
 
 executable Bandwidth
@@ -62,10 +62,10 @@ executable Bandwidth
   ghc-options: -Wall
   build-depends:
       base >=4.3 && <5
-    , text
-    , time
-    , transformers
-    , turtle
+    , text <1.3
+    , time <1.9
+    , transformers <0.6
+    , turtle <1.6
   default-language: Haskell2010
 
 executable Battery
@@ -79,8 +79,8 @@ executable Battery
   ghc-options: -Wall
   build-depends:
       base >=4.3 && <5
-    , text
-    , turtle
+    , text <1.3
+    , turtle <1.6
   default-language: Haskell2010
 
 executable Bitcoin
@@ -91,14 +91,14 @@ executable Bitcoin
       Paths_i3blocks_hs_contrib
   ghc-options: -Wall
   build-depends:
-      aeson
-    , attoparsec
+      aeson <1.5
+    , attoparsec <0.14
     , base >=4.3 && <5
-    , lens
-    , lens-aeson
-    , text
-    , turtle
-    , wreq
+    , lens <4.2
+    , lens-aeson <1.1
+    , text <1.3
+    , turtle <1.6
+    , wreq <0.5
   default-language: Haskell2010
 
 executable Cpu
@@ -112,8 +112,8 @@ executable Cpu
   ghc-options: -Wall
   build-depends:
       base >=4.3 && <5
-    , text
-    , turtle
+    , text <1.3
+    , turtle <1.6
   default-language: Haskell2010
 
 executable DateTime
@@ -125,9 +125,9 @@ executable DateTime
   ghc-options: -Wall
   build-depends:
       base >=4.3 && <5
-    , text
-    , time
-    , turtle
+    , text <1.3
+    , time <1.9
+    , turtle <1.6
   default-language: Haskell2010
 
 executable Docker
@@ -141,8 +141,8 @@ executable Docker
   ghc-options: -Wall
   build-depends:
       base >=4.3 && <5
-    , text
-    , turtle
+    , text <1.3
+    , turtle <1.6
   default-language: Haskell2010
 
 executable Ip
@@ -154,8 +154,8 @@ executable Ip
   ghc-options: -Wall
   build-depends:
       base >=4.3 && <5
-    , text
-    , turtle
+    , text <1.3
+    , turtle <1.6
   default-language: Haskell2010
 
 executable Memory
@@ -169,8 +169,8 @@ executable Memory
   ghc-options: -Wall
   build-depends:
       base >=4.3 && <5
-    , text
-    , turtle
+    , text <1.3
+    , turtle <1.6
   default-language: Haskell2010
 
 executable OpenVpn
@@ -184,8 +184,8 @@ executable OpenVpn
   ghc-options: -Wall
   build-depends:
       base >=4.3 && <5
-    , text
-    , turtle
+    , text <1.3
+    , turtle <1.6
   default-language: Haskell2010
 
 executable Temperature
@@ -197,8 +197,8 @@ executable Temperature
   ghc-options: -Wall
   build-depends:
       base >=4.3 && <5
-    , text
-    , turtle
+    , text <1.3
+    , turtle <1.6
   default-language: Haskell2010
 
 executable Volume
@@ -212,8 +212,8 @@ executable Volume
   ghc-options: -Wall
   build-depends:
       base >=4.3 && <5
-    , text
-    , turtle
+    , text <1.3
+    , turtle <1.6
   default-language: Haskell2010
 
 executable Wifi
@@ -225,6 +225,6 @@ executable Wifi
   ghc-options: -Wall
   build-depends:
       base >=4.3 && <5
-    , text
-    , turtle
+    , text <1.3
+    , turtle <1.6
   default-language: Haskell2010
