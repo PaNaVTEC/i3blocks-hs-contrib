@@ -57,7 +57,7 @@ main =
                 >>= maybe handleNoInterface runScript
                 >>= liftIO
                 .   putStrLn
-        where handleNoInterface = return "No interface"
+        where handleNoInterface = return "No UP interface"
 
 initPath :: NetworkInterface -> Shell FilePath
 initPath interface = do
@@ -67,25 +67,18 @@ initPath interface = do
 
 runScript :: NetworkInterface -> Shell String
 runScript interface = do
-        _ <- initPath interface
-        liftA3 bool
-               (handleInterfaceDown interface)
-               (handleInterfaceUp interface)
-               (isUp interface)
-
-handleInterfaceDown :: NetworkInterface -> Shell String
-handleInterfaceDown interface = return . unpack $ interface <> " is down"
-
-handleInterfaceUp :: NetworkInterface -> Shell String
-handleInterfaceUp interface =
-  maybe handleNoRecordAvailable handleRecord =<< readRecord interface
+  _ <- initPath interface
+  record <- readRecord interface
+  maybe handleNoRecordAvailable handleRecord record
     where
       handleRecord oldRecord =
           formatReport
           .   applyBestUnit
           .   speedReport oldRecord
           <$> writeRecord interface
-      handleNoRecordAvailable = writeRecord interface >>= return "No data"
+      handleNoRecordAvailable = do
+        _ <- writeRecord interface
+        return $ "No data for " <> show interface
 
 writeRecord :: NetworkInterface -> Shell Record
 writeRecord interface =
@@ -194,19 +187,11 @@ convertRate rate' to | unit rate' > to = convertRate (convertRateDown rate') to
           = TransferRate (rate * 1024) (pred from)
 convertRate rate _ = rate
 
-isUp :: Text -> Shell Bool
-isUp interface
-        = let
-                  state = inshell
-                          ("cat /sys/class/net/" <> interface <> "/operstate")
-                          mempty
-          in  ("up" ==) . lineToText <$> state
-
 defaultInterface :: Shell (Maybe NetworkInterface)
 defaultInterface =
         textToMaybe . strip
                 <$> strict (inshell
-                            "ip route | awk '/^default/ { print $5 ; exit }'"
+                            "ip addr | awk '/state UP/ {print $2}' | sed 's/.$//'"
                             mempty
                     )
         where textToMaybe text' = bool (Just text') Nothing (Data.Text.null text')
