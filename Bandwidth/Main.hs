@@ -14,9 +14,12 @@ import           Data.Maybe                (maybe)
 import           Data.Monoid               ((<>))
 import           Data.Text                 (null, pack, strip, unpack)
 import           Data.Time.Clock.POSIX     (getPOSIXTime)
-import           Prelude                   hiding (FilePath)
+import           Prelude                   hiding (FilePath, putStrLn)
 import           Text.Printf               (printf)
+import           Data.Text.IO              (putStrLn)
 import           Turtle                    hiding (empty, fold, printf)
+import           Data.Maybe
+import           System.Environment (getArgs)
 
 data Report = Report {
     uploadRate   :: UploadRate,
@@ -51,13 +54,15 @@ dataPath :: FilePath
 dataPath = "/dev/shm/i3blocks-bandwidth-module"
 
 main :: IO ()
-main =
-        sh
-                $   defaultInterface
-                >>= maybe handleNoInterface runScript
-                >>= liftIO
-                .   putStrLn
-        where handleNoInterface = return "No UP interface"
+main = do
+  icons <- getArgs
+  sh
+          $   defaultInterface
+          >>= maybe handleNoInterface (runScript icons)
+          >>= liftIO
+          .   putStrLn
+  where
+    handleNoInterface = return "No UP interface"
 
 initPath :: NetworkInterface -> Shell FilePath
 initPath interface = do
@@ -65,20 +70,20 @@ initPath interface = do
         touch $ dataPathForInterface interface
         return $ dataPathForInterface interface
 
-runScript :: NetworkInterface -> Shell String
-runScript interface = do
+runScript :: [String] -> NetworkInterface -> Shell Text
+runScript icons interface = do
   _ <- initPath interface
   record <- readRecord interface
   maybe handleNoRecordAvailable handleRecord record
     where
       handleRecord oldRecord =
-          formatReport
+          formatReport icons
           .   applyBestUnit
           .   speedReport oldRecord
           <$> writeRecord interface
       handleNoRecordAvailable = do
         _ <- writeRecord interface
-        return $ "No data for " <> show interface
+        return $ "No data for " <> (pack $ show interface)
 
 writeRecord :: NetworkInterface -> Shell Record
 writeRecord interface =
@@ -146,25 +151,39 @@ speedReport oldRecord newRecord = Report (UploadRate uploadRate')
                 (fromIntegral bytesSentDiff / fromIntegral timediff)
                 Bs
 
-formatReport :: Report -> String
-formatReport report =
-        "\61677 "
-                ++ ( printf "%.1f"
+getUploadIcon :: [String] -> Maybe Text
+getUploadIcon icons = case icons of
+  uploadIcon : _ -> Just $ pack uploadIcon
+  _              -> Nothing
+
+getDownloadIcon :: [String] -> Maybe Text
+getDownloadIcon icons = case icons of
+  _ : downloadIcon : _ -> Just $ pack downloadIcon
+  _                    -> Nothing
+
+formatReport :: [String] -> Report -> Text
+formatReport icons report =
+  let downloadIcon = fromMaybe "Rx " $ getDownloadIcon icons
+      uploadIcon   = fromMaybe "Tx " $ getUploadIcon icons
+  in  downloadIcon
+                <> ( pack
+                   . printf "%.1f"
                    . value
                    . runDownloadRate
                    . downloadRate
                    $ report
                    )
-                ++ (show . unit . runDownloadRate . downloadRate $ report)
-                ++ "  "
-                ++ "\61678 "
-                ++ ( printf "%.1f"
+                <> (pack . show . unit . runDownloadRate . downloadRate $ report)
+                <> "  "
+                <> uploadIcon
+                <> ( pack
+                   . printf "%.1f"
                    . value
                    . runUploadRate
                    . uploadRate
                    $ report
                    )
-                ++ (show . unit . runUploadRate . uploadRate $ report)
+                <> (pack . show . unit . runUploadRate . uploadRate $ report)
 
 applyBestUnit :: Report -> Report
 applyBestUnit = liftA2

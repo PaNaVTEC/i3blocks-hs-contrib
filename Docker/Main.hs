@@ -5,18 +5,29 @@ module Main where
 import           Common
 import           Data.Text (pack)
 import           Turtle
+import           System.Environment (getArgs)
+import           Data.Maybe
+import           Data.Text.IO (putStrLn)
+import           Prelude      hiding (putStrLn)
 
 main :: IO ()
 main = sh $ do
+  icons <- liftIO getArgs
   isRunning <- processIsRunning "dockerd"
   if isRunning
-  then formatCommand (show <$> nImages)
-  else formatCommand (return "x")
+  then formatCommand icons (pack . show <$> nImages)
+  else formatCommand icons (return "x")
 
-formatCommand :: Shell String -> Shell ()
-formatCommand out = do
+getIcon :: [String] -> Maybe Text
+getIcon icons = case icons of
+  icon : _ -> Just $ pack icon
+  _        -> Nothing
+
+formatCommand :: [String] -> Shell Text -> Shell ()
+formatCommand icons out = do
   out' <- out
-  liftIO $ putStrLn $ "\61875" ++ " " ++ out'
+  let icon = fromMaybe "Docker " $ getIcon icons
+  liftIO $ putStrLn $ icon <> out'
 
 nImages :: Shell Integer
 nImages = fold (inshell (pack "docker ps -q") empty) countLines

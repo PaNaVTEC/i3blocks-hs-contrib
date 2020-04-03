@@ -19,7 +19,7 @@ main = do
     maybe (return ExitSuccess) (handleButton onClickHandler) =<< currentButton
 
 printCommand :: String -> Shell ()
-printCommand out = liftIO $ putStrLn $ "\61676" ++ " " ++ out
+printCommand out = liftIO $ putStrLn $ "\61676  " ++ out
 
 handleButton :: MonadIO io => Maybe OnClickHandlerPath -> Button -> io ExitCode
 handleButton handler LeftClick  = maybe (pure ExitSuccess) (`shell` empty) handler
