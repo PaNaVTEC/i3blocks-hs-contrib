@@ -44,7 +44,7 @@ blockOutput report = do
   let longDesc' = toText' . longDesc $ report
   liftIO $ Data.Text.IO.putStrLn longDesc'
   liftIO $ Data.Text.IO.putStrLn $ maybe longDesc' toText'' (shortDesc report)
-  liftIO $ Data.Text.IO.putStrLn $ maybe "" toText''' (color report)
+  void $ traverse (liftIO . Data.Text.IO.putStrLn . toText''') $ color report
   where
     toText' (LongDesc t) = t
     toText'' (ShortDesc t) = t
