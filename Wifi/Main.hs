@@ -19,7 +19,7 @@ formatBlock :: [String] -> Text -> Text
 formatBlock args ssid
   = if Text.null ssid
   then fromMaybe "No WiFi" $ getNoWifiIcon args
-  else (fromMaybe "" $ getWifiIcon args) <> ssid
+  else fromMaybe "" (getWifiIcon args) <> ssid
 
 getNoWifiIcon :: [String] -> Maybe Text
 getNoWifiIcon icons = case icons of
@@ -33,8 +33,5 @@ getWifiIcon icons = case icons of
 
 getSSID :: Shell Text
 getSSID = do
-  exitCode <- shell "iwgetid" empty
-  if (exitCode == (ExitFailure 255))
-    then pure "" --"\64169 "
-    else strict $ inshell "iwgetid -r" empty
-    -- else ("\61931 " <>) <$> strict $ inshell "iwgetid -r" empty
+  (exitCode, out) <- shellStrict "iwgetid -r" empty
+  if exitCode == ExitFailure 255 then pure mempty else pure out

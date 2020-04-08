@@ -6,6 +6,8 @@ import           Data.Text    (pack)
 import           Data.Text.IO (putStrLn)
 import           Numeric
 import           Turtle
+import           Data.Coerce (coerce)
+import           Data.Foldable (traverse_)
 
 processIsRunning :: String -> Shell Bool
 processIsRunning process = (== ExitSuccess) . fst <$> shellStrict (pack $ "pidof " ++ process) empty
@@ -41,11 +43,7 @@ data OutputReport = OutputReport {
 
 blockOutput :: MonadIO io => OutputReport -> io ()
 blockOutput report = do
-  let longDesc' = toText' . longDesc $ report
+  let longDesc' = coerce . longDesc $ report
   liftIO $ Data.Text.IO.putStrLn longDesc'
-  liftIO $ Data.Text.IO.putStrLn $ maybe longDesc' toText'' (shortDesc report)
-  void $ traverse (liftIO . Data.Text.IO.putStrLn . toText''') $ color report
-  where
-    toText' (LongDesc t) = t
-    toText'' (ShortDesc t) = t
-    toText''' (Color t) = t
+  liftIO $ Data.Text.IO.putStrLn $ maybe longDesc' coerce (shortDesc report)
+  traverse_ (liftIO . Data.Text.IO.putStrLn . coerce) $ color report
