@@ -1,25 +1,25 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.31.1.
+-- This file has been generated from package.yaml by hpack version 0.33.0.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 2848a3939923d85f2e41f6999eefbcfd33f0081ad14ce24fa91f6afb64f8e34d
+-- hash: a5188ee4b0a0288a70e0db0e517aeb7ed3c85a162ccd39d65a2103c874a190d1
 
 name:           i3blocks-hs-contrib
-version:        1.0.0
+version:        2.0.0
 synopsis:       Base i3blocks written in haskell
 description:    @i3blocks-hs-contrib@ defines a set of blocks for your i3 bar
+category:       Distribution
 homepage:       https://github.com/panavtec/i3blocks-hs-contrib#readme
 bug-reports:    https://github.com/panavtec/i3blocks-hs-contrib/issues
-license:        MIT
-license-file:   LICENSE
-tested-with:    GHC == 8.4.* , GHC == 8.6.*
 author:         Christian Panadero <panavtec@gmail.com>,
                 Carlos Morera <carlosdelachica@gmail.com>
 maintainer:     Christian Panadero <panavtec@gmail.com>,
                 Carlos Morera <carlosdelachica@gmail.com>
-category:       Distribution
+license:        MIT
+license-file:   LICENSE
+tested-with:    GHC == 8.4.* , GHC == 8.6.*
 build-type:     Simple
 extra-source-files:
     CHANGELOG.md
@@ -88,20 +88,20 @@ executable Battery
   default-language: Haskell2010
 
 executable Bitcoin
-  hs-source-dirs:
-      Bitcoin
   main-is: Main.hs
   other-modules:
       Paths_i3blocks_hs_contrib
+  hs-source-dirs:
+      Bitcoin
   ghc-options: -Wall
   build-depends:
       aeson <1.5
     , attoparsec <0.14
     , base >=4.3 && <5
+    , http-client <0.7
+    , http-client-tls <0.4
     , text <1.3
     , turtle <1.6
-    , http-client < 0.7
-    , http-client-tls < 0.4
   default-language: Haskell2010
 
 executable Cpu
