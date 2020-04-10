@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DeriveAnyClass #-}
 
@@ -8,21 +9,46 @@ import Network.HTTP.Client
 import Network.HTTP.Client.TLS (tlsManagerSettings)
 import Data.Aeson (FromJSON(..), decode)
 import GHC.Generics (Generic(..))
+import System.Environment (getArgs)
 
 main :: IO ()
 main = do
+  args      <- getArgs
+  let (icon, mode) = (getIcon args, getMode args)
+  mResponse <- makeBtcReq mode
+  putStrLn $ maybe "" (formatValue icon mode) mResponse
+
+getIcon :: [String] -> String
+getIcon = \case
+  _ : icon : _ -> icon
+  _            -> ""
+
+getMode :: [String] -> Mode
+getMode = read . head
+
+makeBtcReq :: Mode -> IO (Maybe GdaxResponse)
+makeBtcReq mode = do
   manager  <- newManager tlsManagerSettings
-  request <- createRequest
+  request  <- createRequest
   response <- httpLbs request manager
-  putStrLn $ maybe "" formatValue (decode $ responseBody response)
+  pure . decode $ responseBody response
   where
+    urlForMode
+      = "https://api.gdax.com/products/BTC-"<> show mode <>"/ticker"
     createRequest
-      = addUserAgent <$> parseRequest "https://api.gdax.com/products/BTC-EUR/ticker"
-      where
-        addUserAgent req'
-          = req' { requestHeaders = ("User-Agent", "Ticker") : requestHeaders req' }
+      = addUserAgent <$> parseRequest urlForMode
+    addUserAgent req'
+      = req' { requestHeaders = ("User-Agent", "Ticker") : requestHeaders req' }
 
-formatValue :: GadxResponse -> String
-formatValue (GadxResponse s) = "\61786 " ++ s ++ " €"
+formatValue :: String -> Mode -> GdaxResponse -> String
+formatValue icon mode (GdaxResponse amount)
+  = icon <> formatWithCurrency amount mode
 
-data GadxResponse = GadxResponse { ask :: String } deriving (Generic, FromJSON)
+formatWithCurrency :: String -> Mode -> String
+formatWithCurrency amount = \case
+  EUR -> amount <> " €"
+  USD -> "$ " <> amount
+  GBP -> "£ " <> amount
+
+data GdaxResponse = GdaxResponse { ask :: String } deriving (Generic, FromJSON)
+data Mode = EUR | GBP | USD deriving (Eq, Show, Read)
