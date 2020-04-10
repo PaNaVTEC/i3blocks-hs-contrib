@@ -1,20 +1,28 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveAnyClass #-}
 
 module Main where
 
-import           Control.Lens
-import           Data.Aeson
-import           Data.Aeson.Lens
-import           Data.Text       (unpack)
-import           Network.Wreq
+import Network.HTTP.Client
+import Network.HTTP.Client.TLS (tlsManagerSettings)
+import Data.Aeson (FromJSON(..), decode)
+import GHC.Generics (Generic(..))
 
 main :: IO ()
 main = do
-  response <- get "https://api.gdax.com/products/BTC-EUR/ticker"
-  let ask' = response ^? responseBody . key "ask"
+  manager  <- newManager tlsManagerSettings
+  request <- createRequest
+  response <- httpLbs request manager
+  putStrLn $ maybe "" formatValue (decode $ responseBody response)
+  where
+    createRequest
+      = addUserAgent <$> parseRequest "https://api.gdax.com/products/BTC-EUR/ticker"
+      where
+        addUserAgent req'
+          = req' { requestHeaders = ("User-Agent", "Ticker") : requestHeaders req' }
 
-  putStrLn $ formatValue ask'
+formatValue :: GadxResponse -> String
+formatValue (GadxResponse s) = "\61786 " ++ s ++ " €"
 
-formatValue :: Maybe Value -> String
-formatValue (Just (String s)) = "\61786 " ++ unpack s ++ " €"
-formatValue _                 = ""
+data GadxResponse = GadxResponse { ask :: String } deriving (Generic, FromJSON)
