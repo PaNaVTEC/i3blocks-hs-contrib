@@ -5,13 +5,27 @@ module Main where
 import           Common
 import           Data.Text (pack)
 import           Turtle
+import           Data.Maybe
+import           System.Environment (getArgs)
+import           Data.Text.IO (putStrLn)
+import           Prelude      hiding (putStrLn)
 
 data MemType = MemTotal | MemFree
 
 main :: IO ()
-main = sh $ (liftIO . putStrLn . format') =<< (memory :: Shell Float)
+main = sh $ do
+  icons <- liftIO getArgs
+  (liftIO . putStrLn . format' icons) =<< (memory :: Shell Float)
   where
-    format' mem = "\62171 " ++ formatFloatN mem 2 ++ "G"
+    format' icons mem =
+      let icon = fromMaybe "" $ getIcon icons
+          usedMem = pack $ formatFloatN mem 2
+      in icon <> usedMem <> "G"
+
+getIcon :: [String] -> Maybe Text
+getIcon icons = case icons of
+  icon : _ -> Just $ pack icon
+  _        -> Nothing
 
 memory :: RealFloat a => Shell a
 memory = do

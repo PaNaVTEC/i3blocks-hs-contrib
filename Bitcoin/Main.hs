@@ -1,20 +1,54 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveAnyClass #-}
 
 module Main where
 
-import           Control.Lens
-import           Data.Aeson
-import           Data.Aeson.Lens
-import           Data.Text       (unpack)
-import           Network.Wreq
+import Network.HTTP.Client
+import Network.HTTP.Client.TLS (tlsManagerSettings)
+import Data.Aeson (FromJSON(..), decode)
+import GHC.Generics (Generic(..))
+import System.Environment (getArgs)
 
 main :: IO ()
 main = do
-  response <- get "https://api.gdax.com/products/BTC-EUR/ticker"
-  let ask' = response ^? responseBody . key "ask"
+  args      <- getArgs
+  let (icon, mode) = (getIcon args, getMode args)
+  mResponse <- makeBtcReq mode
+  putStrLn $ maybe "" (formatValue icon mode) mResponse
 
-  putStrLn $ formatValue ask'
+getIcon :: [String] -> String
+getIcon = \case
+  _ : icon : _ -> icon
+  _            -> ""
 
-formatValue :: Maybe Value -> String
-formatValue (Just (String s)) = "\61786 " ++ unpack s ++ " €"
-formatValue _                 = ""
+getMode :: [String] -> Mode
+getMode = read . head
+
+makeBtcReq :: Mode -> IO (Maybe GdaxResponse)
+makeBtcReq mode = do
+  manager  <- newManager tlsManagerSettings
+  request  <- createRequest
+  response <- httpLbs request manager
+  pure . decode $ responseBody response
+  where
+    urlForMode
+      = "https://api.gdax.com/products/BTC-"<> show mode <>"/ticker"
+    createRequest
+      = addUserAgent <$> parseRequest urlForMode
+    addUserAgent req'
+      = req' { requestHeaders = ("User-Agent", "Ticker") : requestHeaders req' }
+
+formatValue :: String -> Mode -> GdaxResponse -> String
+formatValue icon mode (GdaxResponse amount)
+  = icon <> formatWithCurrency amount mode
+
+formatWithCurrency :: String -> Mode -> String
+formatWithCurrency amount = \case
+  EUR -> amount <> " €"
+  USD -> "$ " <> amount
+  GBP -> "£ " <> amount
+
+data GdaxResponse = GdaxResponse { ask :: String } deriving (Generic, FromJSON)
+data Mode = EUR | GBP | USD deriving (Eq, Show, Read)

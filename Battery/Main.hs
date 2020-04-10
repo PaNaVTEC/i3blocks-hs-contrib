@@ -6,6 +6,8 @@ module Main where
 import           Common
 import           Data.Text (pack)
 import           Turtle
+import           Data.Maybe (fromMaybe)
+import           System.Environment (getArgs)
 
 newtype BatteryPercentage = BatteryPercentage Integer
 data BatteryStatus = Discharging | Charging | Full | Plugged | Unknown
@@ -14,33 +16,72 @@ data MemType = MemTotal | MemFree
 main :: IO ()
 main = sh $ do
   acpi <- acpi'
+  icons <- liftIO getArgs
   let info = parse acpi
-  blockOutput $ OutputReport (makeLongDesc info) Nothing (makeColor $ fst info)
+  maybe (renderNoBattery icons) (renderOutput icons) info
   where
-    makeLongDesc = LongDesc . pack . formatBattery
-    makeColor (BatteryPercentage per) = Color <$> batteryColor per
+    renderNoBattery icons =
+      let desc = fromMaybe "No Battery" $ getNoBatteryIcon icons
+      in blockOutput $ OutputReport (LongDesc desc) Nothing Nothing
+    renderOutput icons info
+      = blockOutput $ OutputReport (makeLongDesc info) Nothing (makeColor $ fst info)
+      where
+        makeLongDesc = LongDesc . formatBattery icons
+        makeColor (BatteryPercentage per) = Color <$> batteryColor per
 
-formatBattery :: (BatteryPercentage, BatteryStatus) -> String
-formatBattery (BatteryPercentage per, Discharging) = format' (icon per) per
-formatBattery (BatteryPercentage per, Unknown)     = format' (icon per) per
-formatBattery (BatteryPercentage per, _)           = format' "\61926 " per
+formatBattery :: [String] -> (BatteryPercentage, BatteryStatus) -> Text
+formatBattery icons info = case info of
+  (BatteryPercentage per, Discharging) -> format' (getIcon icons per) per
+  (BatteryPercentage per, Unknown)     -> format' (getIcon icons per) per
+  (BatteryPercentage per, _)           -> format' (fromMaybe "" $ getFullBatteryIcon icons) per
 
-format' :: Show a => String -> a -> String
-format' i per = i ++ " " ++ show per ++ "%"
+format' :: Show a => Text -> a -> Text
+format' icon per = icon <> (pack $ show per) <> "%"
 
-icon :: Integer -> String
-icon p | p >= 90 = "\62016"
-icon p | p >= 75 = "\62017"
-icon p | p >= 50 = "\62018"
-icon p | p >= 25 = "\62019"
-icon _ = "\62020"
+getIcon :: [String] -> Integer -> Text
+getIcon icons p | p >= 90 = fromMaybe "" $ getHighBatteryIcon icons
+getIcon icons p | p >= 75 = fromMaybe "" $ getMediumBatteryIcon icons
+getIcon icons p | p >= 25 = fromMaybe "" $ getLowBatteryIcon icons
+getIcon icons _ = fromMaybe "" $ getEmptyBatteryIcon icons
+
+getNoBatteryIcon :: [String] -> Maybe Text
+getNoBatteryIcon icons = case icons of
+  icon : _ -> Just $ pack icon
+  _        -> Nothing
+
+getEmptyBatteryIcon :: [String] -> Maybe Text
+getEmptyBatteryIcon icons = case icons of
+  _ : icon : _ -> Just $ pack icon
+  _            -> Nothing
+
+getLowBatteryIcon :: [String] -> Maybe Text
+getLowBatteryIcon icons = case icons of
+  _ : _ : icon : _ -> Just $ pack icon
+  _                -> Nothing
+
+getMediumBatteryIcon :: [String] -> Maybe Text
+getMediumBatteryIcon icons = case icons of
+  _ : _ : _ : icon : _ -> Just $ pack icon
+  _                    -> Nothing
+
+getHighBatteryIcon :: [String] -> Maybe Text
+getHighBatteryIcon icons = case icons of
+  _ : _ : _ : _ : icon : _ -> Just $ pack icon
+  _                        -> Nothing
+
+getFullBatteryIcon :: [String] -> Maybe Text
+getFullBatteryIcon icons = case icons of
+  _ : _ : _ : _ : _ : icon : _ -> Just $ pack icon
+  _                            -> Nothing
 
 batteryColor :: Integer -> Maybe Text
 batteryColor p | p <= 25 = Just "#ff0000"
 batteryColor _ = Nothing
 
-parse :: Text -> (BatteryPercentage, BatteryStatus)
-parse acpi = head $ match batteryLeft acpi
+parse :: Text -> Maybe (BatteryPercentage, BatteryStatus)
+parse acpi = case match batteryLeft acpi of
+  [] -> Nothing
+  info:_ -> Just info
 
 batteryLeft :: Pattern (BatteryPercentage, BatteryStatus)
 batteryLeft = do

@@ -57,9 +57,8 @@ executables:
     dependencies:
     - aeson < 1.5
     - attoparsec < 0.14
-    - wreq < 0.5
-    - lens < 4.2
-    - lens-aeson < 1.1
+    - http-client < 0.7
+    - http-client-tls < 0.4
 
   Cpu:
     main: Main.hs

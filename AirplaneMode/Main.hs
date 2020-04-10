@@ -5,7 +5,12 @@ module Main where
 import           Common
 import           Data.Bool
 import           Data.Text (lines, pack)
+import           Data.Text.IO (putStrLn)
+import           Prelude      hiding (putStrLn)
 import           Turtle
+import           System.Environment (getArgs)
+import qualified Data.Text as Text
+import           Data.Maybe
 
 type CardName = Text
 type CardDev = Text
@@ -22,10 +27,25 @@ main = sh $ do
   rfkill <- rfkill'
   let cards = head $ match (parseCards rfkill) rfkill
   let isAirplaneOn = isAirplaneMode cards
-  bool (airplaneModeOff cards) (airplaneModeOn cards) isAirplaneOn
+  icons <- liftIO getArgs
+  bool (airplaneModeOff icons cards) (airplaneModeOn icons cards) isAirplaneOn
   where
-    airplaneModeOn cards = do liftIO $ putStrLn "\61554"; handleClick Deactivate cards
-    airplaneModeOff cards = do liftIO $ putStrLn "\61554 x"; handleClick Activate cards
+    airplaneModeOn icons cards = do
+      liftIO $ putStrLn $ fromMaybe "Airplane On" $ getAirplaneOnIcon icons
+      handleClick Deactivate cards
+    airplaneModeOff icons cards = do
+      liftIO $ putStrLn $ fromMaybe "Airplane Off" $ getAirplaneOffIcon icons
+      handleClick Activate cards
+
+getAirplaneOffIcon :: [String] -> Maybe Text
+getAirplaneOffIcon icons = case icons of
+  airplaneOffIcon : _ -> Just $ Text.pack airplaneOffIcon
+  _                   -> Nothing
+
+getAirplaneOnIcon :: [String] -> Maybe Text
+getAirplaneOnIcon icons = case icons of
+  _ : airplaneOnIcon : _ -> Just $ Text.pack airplaneOnIcon
+  _                      -> Nothing
 
 handleClick :: AirplaneAction -> [Card] -> Shell [ExitCode]
 handleClick action cards = do
