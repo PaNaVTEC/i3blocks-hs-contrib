@@ -1,6 +1,6 @@
+{-# LANGUAGE LambdaCase #-}
 module Main where
 
-import           Data.Maybe          (fromMaybe)
 import           Data.Time.Format
 import           Data.Time.LocalTime
 import           System.Environment
@@ -8,11 +8,18 @@ import           System.Environment
 main :: IO ()
 main = do
   args <- getArgs
-  getZonedTime >>= printDateTime . formatTime defaultTimeLocale (format $ safeHead args)
-  where
-    format = fromMaybe "%d-%m-%y %H:%M"
-    printDateTime datetime = putStrLn $ "\61747  " ++ datetime
+  let (format, icon) = (getFormat args, getIcon args)
+  zonedTime <- getZonedTime
+  putStrLn $ icon <> (formatTime defaultTimeLocale format zonedTime)
 
-safeHead :: [a] -> Maybe a
-safeHead l | not (null l) = Just $ head l
-safeHead _ = Nothing
+getIcon :: [String] -> String
+getIcon = \case
+  _ : icon : _ -> icon
+  _            -> ""
+
+getFormat :: [String] -> String
+getFormat = \case
+  format : _ -> format
+  _ -> defaultFormat
+  where
+    defaultFormat = "%d-%m-%y %H:%M"
