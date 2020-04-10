@@ -3,7 +3,7 @@ module Main where
 
 import           Data.Time.Format
 import           Data.Time.LocalTime
-import           System.Environment
+import           System.Environment (getArgs)
 
 main :: IO ()
 main = do
