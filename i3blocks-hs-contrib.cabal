@@ -4,10 +4,10 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 03f4f39fbd4722afa2273b250b58b2172c3d7c6de6c7c332a4f8c9ad7ee58027
+-- hash: e30a7cecad9b9057ad7c9f41a629e90ddd2fcd0373f19639ce42d69eab863341
 
 name:           i3blocks-hs-contrib
-version:        2.0.1
+version:        2.1.0
 synopsis:       Base i3blocks written in haskell
 description:    @i3blocks-hs-contrib@ defines a set of blocks for your i3 bar
 category:       Distribution

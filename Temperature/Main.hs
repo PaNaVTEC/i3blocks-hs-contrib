@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE LambdaCase #-}
 
 module Main where
 
@@ -11,20 +12,24 @@ import           Data.Maybe
 
 main :: IO ()
 main = do
-  icons <- getArgs
-  sh $ liftIO . putStrLn . formatBlock icons =<< cpuTemperature
+  args <- getArgs
+  sh $ liftIO . putStrLn . formatBlock args =<< cpuTemperature (getSensor args)
 
 formatBlock :: [String] -> Text -> Text
 formatBlock icons temp =
   let icon = fromMaybe "" $ getIcon icons
-  in icon <> temp <> "°C"
+  in icon <> temp
+
+getSensor :: [String] -> Text
+getSensor = pack . head
 
 getIcon :: [String] -> Maybe Text
-getIcon icons = case icons of
-  icon : _ -> Just $ pack icon
-  _        -> Nothing
+getIcon = \case
+  _ : icon : _ -> Just $ pack icon
+  _            -> Nothing
 
-cpuTemperature :: Shell Text
-cpuTemperature
-  = strip
-  <$> strict (inshell "sensors | grep -oP 'Package[^\\+]*\\+\\K[0-9]+'" mempty)
+cpuTemperature :: Text -> Shell Text
+cpuTemperature sensor
+  = strip <$> strict (inshell cmd mempty)
+  where
+    cmd = "sensors | grep '" <> sensor <> "' | cut -d':' -f2 | awk '{$1=$1};1' | cut -d' ' -f1"
