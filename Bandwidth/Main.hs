@@ -12,9 +12,9 @@ import           Data.Functor              (($>))
 import           Data.List                 (intersperse)
 import           Data.Maybe                (maybe)
 import           Data.Monoid               ((<>))
-import           Data.Text                 (null, pack, strip, unpack)
+import           Data.Text                 (null, pack, strip, unpack, words)
 import           Data.Time.Clock.POSIX     (getPOSIXTime)
-import           Prelude                   hiding (FilePath, putStrLn)
+import           Prelude                   hiding (FilePath, putStrLn, words)
 import           Text.Printf               (printf)
 import           Data.Text.IO              (putStrLn)
 import           Turtle                    hiding (empty, fold, printf)
@@ -208,7 +208,7 @@ convertRate rate _ = rate
 
 defaultInterface :: Shell (Maybe NetworkInterface)
 defaultInterface =
-        textToMaybe . strip
+        textToMaybe . head . words . strip
                 <$> strict (inshell
                             "ip addr | awk '/state UP/ {print $2}' | sed 's/.$//'"
                             mempty
