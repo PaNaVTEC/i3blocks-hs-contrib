@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.33.0.
+-- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: e30a7cecad9b9057ad7c9f41a629e90ddd2fcd0373f19639ce42d69eab863341
+-- hash: 9348db0a876e9ddb8a6edc2ce1d5c9d11bca5267710195f2b0a0d51994ac801f
 
 name:           i3blocks-hs-contrib
 version:        2.1.0
@@ -19,7 +19,8 @@ maintainer:     Christian Panadero <panavtec@gmail.com>,
                 Carlos Morera <carlosdelachica@gmail.com>
 license:        MIT
 license-file:   LICENSE
-tested-with:    GHC == 8.4.* , GHC == 8.6.*
+tested-with:
+    GHC == 8.4.* , GHC == 8.6.*
 build-type:     Simple
 extra-source-files:
     CHANGELOG.md
